@@ -1,6 +1,6 @@
-package ai.bitflow.comfyui.api.bridge.extn
+package ai.bitflow.comfyui.multi.gateway.extn
 
-import ai.bitflow.comfyui.api.bridge.rsps.ComnRsps
+import ai.bitflow.comfyui.multi.gateway.rsps.ComnRsps
 import jakarta.inject.Inject
 import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.ext.ExceptionMapper

@@ -1,4 +1,4 @@
-package ai.bitflow.comfyui.api.bridge.rqst
+package ai.bitflow.comfyui.multi.gateway.rqst
 
 import jakarta.ws.rs.core.MediaType
 import org.jboss.resteasy.reactive.PartType

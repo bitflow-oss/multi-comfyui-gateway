@@ -1,4 +1,4 @@
-package ai.bitflow.comfyui.api.bridge.rsps
+package ai.bitflow.comfyui.multi.gateway.rsps
 
 import org.apache.hc.core5.http.HttpStatus
 

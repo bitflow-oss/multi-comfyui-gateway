@@ -43,4 +43,4 @@ nb-configuration.xml
 out/
 doc/
 docs/
-src/main/resources/templates/workflow/*
+workflow/*

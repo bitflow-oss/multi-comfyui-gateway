@@ -1,16 +1,16 @@
-package ai.bitflow.comfyui.api.bridge.srvc
+package ai.bitflow.comfyui.multi.gateway.srvc
 
-import ai.bitflow.comfyui.api.bridge.cnst.WbskCnst
-import ai.bitflow.comfyui.api.bridge.dao.CmfyRestClnt
-import ai.bitflow.comfyui.api.bridge.dao.CmfyWbskClnt
-import ai.bitflow.comfyui.api.bridge.data.CmfyQueInfo
-import ai.bitflow.comfyui.api.bridge.data.CmfyTaskQue
-import ai.bitflow.comfyui.api.bridge.extn.FullQueExtn
-import ai.bitflow.comfyui.api.bridge.rqst.GnrtTextToImgRqst
-import ai.bitflow.comfyui.api.bridge.rsps.GnrtTextToImgRsps
-import ai.bitflow.comfyui.api.bridge.rsps.QueStatRsps
-import io.quarkus.qute.Location
-import io.quarkus.qute.Template
+import ai.bitflow.comfyui.multi.gateway.cnst.WbskCnst
+import ai.bitflow.comfyui.multi.gateway.dao.CmfyRestClnt
+import ai.bitflow.comfyui.multi.gateway.dao.CmfyWbskClnt
+import ai.bitflow.comfyui.multi.gateway.dao.HostJsonTpltLctr
+import ai.bitflow.comfyui.multi.gateway.data.CmfyQueInfo
+import ai.bitflow.comfyui.multi.gateway.data.CmfyTaskQue
+import ai.bitflow.comfyui.multi.gateway.extn.FullQueExtn
+import ai.bitflow.comfyui.multi.gateway.rqst.GnrtTextToImgRqst
+import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
+import ai.bitflow.comfyui.multi.gateway.rsps.QueStatRsps
+import io.quarkus.qute.Engine
 import io.quarkus.websockets.next.WebSocketClientConnection
 import io.quarkus.websockets.next.WebSocketConnector
 import jakarta.enterprise.context.ApplicationScoped
@@ -49,22 +49,17 @@ class GnrtJobSrvc {
   lateinit var COMFYUI_MAX_QUEUE_SIZE: String
 
   @Inject
-  @Location("wkfw/flux1DevIniv.json")
-  lateinit var flux1DevIniv: Template
+  lateinit var templateEngine: Engine
+
+//  @Inject
+//  @Location("wkfw/flux1DevIniv.json")
+//  lateinit var flux1DevIniv: Template
 
   @Inject
-  @Location("wkfw/flux1DevEdge.json")
-  lateinit var flux1DevEdge: Template
-
-  @Inject
-  @Location("wkfw/flux1DevGguf.json")
-  lateinit var flux1DevGguf: Template
-
-  @Inject
-  @Location("wkfw/flux1DevFp8.json")
-  lateinit var flux1DevFp8: Template
+  lateinit var hostJsonTpltLctr: HostJsonTpltLctr
 
   private var taskQue = CmfyTaskQue()
+
 
   /**
    * API를 통한 ComfyUI 워크플로 호스팅
@@ -97,7 +92,9 @@ class GnrtJobSrvc {
     val cmfyClnt: CmfyRestClnt = getRestClient(que.queNo)
     // 1. 워크플로우 template에 동적 파라미터 매핑
     var data = param.prompt
-    param.prompt = flux1DevIniv.data("data", data).render()
+//    hostJsonTpltLctr.locate("/'workflow/some-workflow.json")
+    param.prompt = templateEngine.getTemplate("/'workflow/some-workflow.json").data("data", data).render()
+    log.debug("prompt ${param.prompt}")
     // 2. Rest 생성요청 큐잉
     cmfyClnt.queuePrompt(getCmfyAuthHead(), param)
     // 3. Websocket => nedd to open to listen progress
@@ -108,6 +105,8 @@ class GnrtJobSrvc {
     )
     return ret
   }
+
+
 
   /**
    * API를 통한 ComfyUI 워크플로 호스팅

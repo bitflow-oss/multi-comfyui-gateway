@@ -39,6 +39,9 @@ dependencies {
   implementation("io.quarkus:quarkus-mongodb-panache-kotlin:$quarkusPlatformVersion")
   implementation("org.apache.httpcomponents.core5:httpcore5:5.3.3")
 
+  // google
+  implementation("com.google.code.gson:gson:2.10.1")
+
   testImplementation("io.quarkus:quarkus-junit5:$quarkusPlatformVersion")
   testImplementation("io.rest-assured:rest-assured:5.5.1")
   implementation(kotlin("stdlib-jdk8"))

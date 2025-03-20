@@ -1,4 +1,4 @@
-package ai.bitflow.comfyui.api.bridge.data
+package ai.bitflow.comfyui.multi.gateway.data
 
 class CmfyTaskQue {
   var get1 = mutableListOf<MutableMap<String, CmfyTaskItem>>()

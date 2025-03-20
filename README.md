@@ -1,1 +1,1 @@
-# ComfyUI API Bridge
+# Multi ComfyUI Gateway

@@ -1,18 +1,11 @@
-package ai.bitflow.comfyui.api.bridge.dao
+package ai.bitflow.comfyui.multi.gateway.dao
 
-import ai.bitflow.comfyui.api.bridge.rqst.CmfyUpldImgRqst
-import ai.bitflow.comfyui.api.bridge.rqst.GnrtTextToImgRqst
-import io.quarkus.rest.client.reactive.ClientExceptionMapper
-import jakarta.ws.rs.Consumes
-import jakarta.ws.rs.GET
-import jakarta.ws.rs.HeaderParam
-import jakarta.ws.rs.POST
-import jakarta.ws.rs.Path
-import jakarta.ws.rs.Produces
+import ai.bitflow.comfyui.multi.gateway.rqst.CmfyUpldImgRqst
+import ai.bitflow.comfyui.multi.gateway.rqst.GnrtTextToImgRqst
+import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient
-import org.jboss.resteasy.reactive.RestForm
 import org.jboss.resteasy.reactive.RestPath
 import org.jboss.resteasy.reactive.RestQuery
 

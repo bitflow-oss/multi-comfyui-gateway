@@ -1,4 +1,4 @@
-package ai.bitflow.comfyui.api.bridge.rqst
+package ai.bitflow.comfyui.multi.gateway.rqst
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

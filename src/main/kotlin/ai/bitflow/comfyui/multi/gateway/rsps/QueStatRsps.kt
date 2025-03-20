@@ -1,4 +1,4 @@
-package ai.bitflow.comfyui.api.bridge.rsps
+package ai.bitflow.comfyui.multi.gateway.rsps
 
 data class QueStatRsps (
   var que1: Int = -1,

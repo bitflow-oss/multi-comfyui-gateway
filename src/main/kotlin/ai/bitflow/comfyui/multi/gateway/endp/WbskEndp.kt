@@ -1,10 +1,10 @@
-package ai.bitflow.comfyui.api.bridge.endp
+package ai.bitflow.comfyui.multi.gateway.endp
 
-import ai.bitflow.comfyui.api.bridge.cnst.WbskCnst
-import ai.bitflow.comfyui.api.bridge.extn.FullQueExtn
-import ai.bitflow.comfyui.api.bridge.rqst.GnrtTextToImgRqst
-import ai.bitflow.comfyui.api.bridge.rsps.GnrtTextToImgRsps
-import ai.bitflow.comfyui.api.bridge.srvc.GnrtJobSrvc
+import ai.bitflow.comfyui.multi.gateway.cnst.WbskCnst
+import ai.bitflow.comfyui.multi.gateway.extn.FullQueExtn
+import ai.bitflow.comfyui.multi.gateway.rqst.GnrtTextToImgRqst
+import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
+import ai.bitflow.comfyui.multi.gateway.srvc.GnrtJobSrvc
 import io.quarkus.websockets.next.*
 import io.vertx.core.buffer.Buffer
 import jakarta.enterprise.context.ApplicationScoped

@@ -1,8 +1,10 @@
-package ai.bitflow.comfyui.api.bridge.endp
+package ai.bitflow.comfyui.multi.gateway.endp
 
-import ai.bitflow.comfyui.api.bridge.rqst.CmfyUpldImgRqst
-import ai.bitflow.comfyui.api.bridge.rqst.GnrtTextToImgRqst
-import ai.bitflow.comfyui.api.bridge.rsps.ComnRsps
+import ai.bitflow.comfyui.multi.gateway.rqst.CmfyUpldImgRqst
+import ai.bitflow.comfyui.multi.gateway.rqst.GnrtTextToImgRqst
+import ai.bitflow.comfyui.multi.gateway.rsps.ComnRsps
+import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
+import ai.bitflow.comfyui.multi.gateway.srvc.GnrtJobSrvc
 import io.vertx.core.http.HttpServerRequest
 import jakarta.inject.Inject
 import jakarta.ws.rs.*
@@ -18,13 +20,17 @@ class RestEndp {
   @Inject
   lateinit var log: Logger
 
+  @Inject
+  lateinit var gnrtJobSrvc: GnrtJobSrvc
+
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @Path("prompt")
   fun queuePrompt(param: GnrtTextToImgRqst, req: HttpServerRequest)
-    : ComnRsps<Boolean>? {
-    return ComnRsps(false)
+    : ComnRsps<GnrtTextToImgRsps>? {
+    val ret: GnrtTextToImgRsps = gnrtJobSrvc.generateImages(param)
+    return ComnRsps(ret)
   }
 
   @GET

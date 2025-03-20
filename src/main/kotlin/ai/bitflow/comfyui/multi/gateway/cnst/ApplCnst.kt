@@ -1,4 +1,4 @@
-package ai.bitflow.comfyui.api.bridge.cnst
+package ai.bitflow.comfyui.multi.gateway.cnst
 
 object WbskCnst {
   const val ON_CONNECT = "connected"
