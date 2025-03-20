@@ -15,7 +15,6 @@ import org.jboss.resteasy.reactive.RestQuery
  * ComfyUI API 사용법 구축
  * https://youngri.tistory.com/40
  */
-@Path("ws")
 @RegisterRestClient
 interface CmfyRestClnt {
 

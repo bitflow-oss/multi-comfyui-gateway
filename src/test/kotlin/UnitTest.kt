@@ -1,3 +1,4 @@
+import ai.bitflow.comfyui.multi.gateway.dao.CmfyHostChckDao
 import ai.bitflow.comfyui.multi.gateway.dao.CmfyWbskClnt
 import ai.bitflow.comfyui.multi.gateway.srvc.GnrtJobSrvc
 import io.quarkus.test.junit.QuarkusTest
@@ -28,6 +29,9 @@ class UnitTest {
   @Inject
   lateinit var gnrtJobSrvc: GnrtJobSrvc
 
+  @Inject
+  lateinit var cmfyHostChckDao: CmfyHostChckDao
+
 
   @Test
   fun testWebPageEndpoint() {
@@ -50,7 +54,7 @@ class UnitTest {
     val testClientId = "test-client-id"
     var uri: URI = gnrtJobSrvc.getWebsocketUri(0, testClientId)
     val connection: WebSocketClientConnection = connector
-      .addHeader("Authorization", gnrtJobSrvc.getCmfyAuthHead())
+      .addHeader("Authorization", cmfyHostChckDao.getCmfyAuthHead())
       .baseUri(uri).pathParam("clientId", testClientId)
       .connectAndAwait()
     log.debug("testWebsocketEndpoint")

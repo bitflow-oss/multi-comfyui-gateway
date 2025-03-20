@@ -1,6 +1,7 @@
 package ai.bitflow.comfyui.multi.gateway.srvc
 
 import ai.bitflow.comfyui.multi.gateway.cnst.WbskCnst
+import ai.bitflow.comfyui.multi.gateway.dao.CmfyHostChckDao
 import ai.bitflow.comfyui.multi.gateway.dao.CmfyRestClnt
 import ai.bitflow.comfyui.multi.gateway.dao.CmfyWbskClnt
 import ai.bitflow.comfyui.multi.gateway.dao.HostJsonTpltLctr
@@ -29,44 +30,11 @@ class GnrtJobSrvc {
   @Inject
   lateinit var log: Logger
 
-  @Inject
-  lateinit var connector: WebSocketConnector<CmfyWbskClnt>
-
-  @ConfigProperty(name = "comfyui.instance.count")
-  lateinit var COMFYUI_INSTANCE_COUNT: String
-
-  @ConfigProperty(name = "quarkus.rest-client.comfyui-1.url")
-  lateinit var COMFYI_HOST_1: String
-
-  @ConfigProperty(name = "quarkus.rest-client.comfyui-2.url")
-  lateinit var COMFYI_HOST_2: String
-
-  @ConfigProperty(name = "quarkus.rest-client.comfyui-3.url")
-  lateinit var COMFYI_HOST_3: String
-
-  @ConfigProperty(name = "quarkus.rest-client.comfyui-4.url")
-  lateinit var COMFYI_HOST_4: String
-
-  @ConfigProperty(name = "quarkus.rest-client.comfyui-5.url")
-  lateinit var COMFYI_HOST_5: String
-
-  @ConfigProperty(name = "quarkus.rest-client.comfyui-6.url")
-  lateinit var COMFYI_HOST_6: String
-
-  @ConfigProperty(name = "quarkus.rest-client.comfyui-7.url")
-  lateinit var COMFYI_HOST_7: String
-
-  @ConfigProperty(name = "quarkus.rest-client.comfyui-8.url")
-  lateinit var COMFYI_HOST_8: String
-
-  @ConfigProperty(name = "comfyui.api.key")
-  lateinit var CMFY_API_KEY: String
-
   @ConfigProperty(name = "comfyui.max.queue.size.each")
   lateinit var COMFYUI_MAX_QUE_SIZE_EACH: String
 
-  @ConfigProperty(name = "comfyui.max.queue.size.total")
-  lateinit var COMFYUI_MAX_QUE_SIZE_TOTL: String
+  @Inject
+  lateinit var connector: WebSocketConnector<CmfyWbskClnt>
 
   @Inject
   lateinit var templateEngine: Engine
@@ -74,42 +42,11 @@ class GnrtJobSrvc {
   @Inject
   lateinit var hostJsonTpltLctr: HostJsonTpltLctr
 
+  @Inject
+  lateinit var cmfyHostChckDao: CmfyHostChckDao
+
   private var comfyUiQues: CmfyTaskQue? = null
 
-  private fun getComfyUiQues() {
-    val queDefn = getComfyHost()
-    queDefn.forEachIndexed { i, it ->
-      val cmfyClnt: CmfyRestClnt = getRestClient(i)
-      cmfyClnt.getQueuePrompt(getCmfyAuthHead())
-    }
-  }
-
-  private fun getComfyHost(): Array<String?> {
-    val cnt = COMFYUI_INSTANCE_COUNT.toInt()
-    var ret = arrayOfNulls<String>(cnt)
-    for (i in 0..< cnt) {
-      when (i) {
-        0 -> ret[i] = COMFYI_HOST_1
-        1 -> ret[i] = COMFYI_HOST_2
-        2 -> ret[i] = COMFYI_HOST_3
-        3 -> ret[i] = COMFYI_HOST_4
-        4 -> ret[i] = COMFYI_HOST_5
-        5 -> ret[i] = COMFYI_HOST_6
-        6 -> ret[i] = COMFYI_HOST_7
-        7 -> ret[i] = COMFYI_HOST_8
-      }
-    }
-    return ret
-  }
-
-  private fun getComfyHostNameAt(idx: Int): String {
-    val hostName = getComfyHost()
-    if (idx < 0 || idx >= hostName.size) {
-      throw CmfyQueEctn()
-    } else {
-      return getComfyHost()[idx]!!
-    }
-  }
 
   /**
    * API를 통한 ComfyUI 워크플로 호스팅
@@ -139,7 +76,7 @@ class GnrtJobSrvc {
     if (que == null) {
       throw NoNodeEctn()
     }
-    val cmfyClnt: CmfyRestClnt = getRestClient(que.queNo)
+    val cmfyClnt: CmfyRestClnt = cmfyHostChckDao.getRestClient(que.queNo)
     // 1. 워크플로우 template에 동적 파라미터 매핑
 //    var data = param.prompt
 //    hostJsonTpltLctr.locate("/'workflow/some-workflow.json")
@@ -149,7 +86,7 @@ class GnrtJobSrvc {
     )
     log.debug("prompt ${outParam.prompt}")
     // 2. Rest 생성요청 큐잉
-    cmfyClnt.queuePrompt(getCmfyAuthHead(), outParam)
+    cmfyClnt.queuePrompt(cmfyHostChckDao.getCmfyAuthHead(), outParam)
     // 3. Websocket => nedd to open to listen progress
     cnntCmfyAndSendMsg(que.queNo, outParam.clientId)
     var ret = GnrtTextToImgRsps(
@@ -180,6 +117,10 @@ class GnrtJobSrvc {
   }
 
   private fun getBestQue(): CmfyQueInfo? {
+
+    if (cmfyHostChckDao.getComfyHostSize() < 1) {
+      cmfyHostChckDao.getComfyHost()
+    }
     if (comfyUiQues == null || comfyUiQues!!.get.size < 1) {
       return null
     }
@@ -197,24 +138,14 @@ class GnrtJobSrvc {
   fun cnntCmfyAndSendMsg(queNo: Int, clientId: String) {
     var uri: URI = getWebsocketUri(queNo, clientId)
     val connection: WebSocketClientConnection = connector
-      .addHeader("Authorization", getCmfyAuthHead())
+      .addHeader("Authorization", cmfyHostChckDao.getCmfyAuthHead())
       .baseUri(uri).pathParam("clientId", clientId)
       .connectAndAwait()
     connection.sendTextAndAwait("Hi!")
   }
 
-  fun getCmfyAuthHead(): String {
-    return "Bearer $CMFY_API_KEY"
-  }
-
-  fun getRestClient(idx: Int): CmfyRestClnt {
-    return RestClientBuilder.newBuilder()
-      .baseUri(URI("http://${getComfyHostNameAt(idx)}"))
-      .build<CmfyRestClnt>(CmfyRestClnt::class.java)
-  }
-
   fun getWebsocketUri(idx: Int, clientId: String): URI {
-    return URI.create("ws://${getComfyHostNameAt(idx)}/ws?clientId=$clientId")
+    return URI.create("ws://${cmfyHostChckDao.getComfyHostNameAt(idx)}/ws?clientId=$clientId")
   }
 
 }

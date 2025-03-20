@@ -28,7 +28,7 @@ class MultiComfyExceptionHandler : ExceptionMapper<NodeAndQueEctn> {
         msg = "No ComfyUi nodes found")
     }
 
-    log.error("[FullQueExtn]: ${e.javaClass}, message: ${e.message}")
+    log.error("[ComfyExtn]: ${e.javaClass}, message: ${e.message}")
     return Response.status(HttpStatus.SC_OK).entity(content).build()
   }
 
