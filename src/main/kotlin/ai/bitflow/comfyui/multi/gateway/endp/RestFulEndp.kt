@@ -27,9 +27,9 @@ class RestFulEndp {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @Path("prompt")
-  fun queuePrompt(param: GtwyTextToImgRqst, req: HttpServerRequest): ComnRsps<GnrtTextToImgRsps> {
+  fun queuePrompt(param: GtwyTextToImgRqst, req: HttpServerRequest): ComnRsps<Boolean> {
     log.debug("[queuePrompt] $param")
-    val ret: GnrtTextToImgRsps = gnrtJobSrvc.generateImages(param)
+    val ret: Boolean = gnrtJobSrvc.generateImages(param)
     return ComnRsps(ret)
   }
 

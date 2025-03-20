@@ -1,8 +1,16 @@
 package ai.bitflow.comfyui.multi.gateway.dao
 
-import ai.bitflow.comfyui.multi.gateway.excn.CmfyQueEctn
+import ai.bitflow.comfyui.multi.gateway.cnst.WbskCnst
+import ai.bitflow.comfyui.multi.gateway.data.CmfyQueInfo
+import ai.bitflow.comfyui.multi.gateway.data.CmfyTaskItem
+import ai.bitflow.comfyui.multi.gateway.excn.FullQueEctn
+import ai.bitflow.comfyui.multi.gateway.excn.NoNodeEctn
+import ai.bitflow.comfyui.multi.gateway.rqst.CmfyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rsps.CmfyGetQueRsps
+import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
 import com.google.gson.Gson
+import io.quarkus.websockets.next.WebSocketClientConnection
+import io.quarkus.websockets.next.WebSocketConnector
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import org.eclipse.microprofile.config.inject.ConfigProperty
@@ -52,17 +60,18 @@ class CmfyHostChckDao {
   @ConfigProperty(name = "comfyui.max.queue.size.total")
   lateinit var COMFYUI_MAX_QUE_SIZE_TOTL: String
 
+  @Inject
+  lateinit var connector: WebSocketConnector<CmfyWbskClnt>
+
   private var comfyHosts = mutableListOf<String>()
 
-  fun getComfyHostSize(): Int {
-    return comfyHosts.size
-  }
+  private var comfyUiQues = mutableListOf<ArrayDeque<CmfyTextToImgRqst>>()
 
   fun getCmfyAuthHead(): String {
     return "Bearer $CMFY_API_KEY"
   }
 
-  fun getComfyHost(): MutableList<String> {
+  fun getComfyHostList(): MutableList<String> {
     if (this.comfyHosts.size < 1) {
       val cnt = COMFYUI_INSTANCE_COUNT.toInt()
       val ret = arrayOfNulls<String>(cnt)
@@ -94,6 +103,7 @@ class CmfyHostChckDao {
         log.debug("[GetPmptRsps] " + Gson().toJson(rsps))
         if (rsps.execInfo.queueRemaining != null) {
           this.comfyHosts.add(it)
+          this.comfyUiQues.add(ArrayDeque())
         }
       } catch (e: Exception) {
         e.printStackTrace()
@@ -116,12 +126,92 @@ class CmfyHostChckDao {
   }
 
   fun getComfyHostNameAt(idx: Int): String {
-    val hostName = getComfyHost()
+    val hostName = getComfyHostList()
     if (idx < 0 || idx >= hostName.size) {
-      throw CmfyQueEctn()
+      throw FullQueEctn()
     } else {
-      return getComfyHost()[idx]!!
+      return getComfyHostList()[idx]
     }
   }
 
+  fun getBestQue(task: CmfyTextToImgRqst): ArrayDeque<CmfyTextToImgRqst>? {
+    val cmfyHostList = getComfyHostList()
+    if (cmfyHostList.isEmpty()) {
+      throw NoNodeEctn()
+    }
+    val minQueIdx = this.comfyUiQues.indexOf(comfyUiQues.minBy { it.size })
+    if (this.comfyUiQues[minQueIdx].size < COMFYUI_MAX_QUE_SIZE_EACH.toInt()) {
+      task.nodeIdx = minQueIdx
+      return this.comfyUiQues[minQueIdx]
+    } else {
+      return null
+    }
+  }
+
+  fun getBestQueInfo(): CmfyQueInfo? {
+    val cmfyHostList = getComfyHostList()
+    if (cmfyHostList.isEmpty()) {
+      throw NoNodeEctn()
+    }
+    val minQueIdx = this.comfyUiQues.indexOf(comfyUiQues.minBy { it.size })
+    if (this.comfyUiQues[minQueIdx].size < COMFYUI_MAX_QUE_SIZE_EACH.toInt()) {
+      return CmfyQueInfo(
+        nodeIdx = minQueIdx,
+        queSize = this.comfyUiQues[minQueIdx].size
+      )
+    }
+    return null
+  }
+
+  fun pullQue(nodeIdx: Int): GnrtTextToImgRsps? {
+    val item: CmfyTextToImgRqst = this.comfyUiQues[nodeIdx].removeFirst()
+    val cmfyClnt: CmfyRestClnt = getRestClient(nodeIdx)
+    val cmfyRsps: Map<String, Any> = cmfyClnt.queuePrompt(getCmfyAuthHead(), item)
+//    cnntCmfyAndSendMsg(nodeIdx, item.clientId)
+    val ret = GnrtTextToImgRsps(
+      clientId = item.clientId,
+      stat = WbskCnst.ON_QUE_ADD
+    )
+    return ret
+  }
+
+  fun getQueStat(): List<ArrayDeque<CmfyTextToImgRqst>>? {
+    return this.comfyUiQues
+  }
+
+  fun addCmfyTaskQue(task: CmfyTextToImgRqst): Boolean {
+    val que: ArrayDeque<CmfyTextToImgRqst> = getBestQue(task) ?: throw FullQueEctn()
+    log.debug("[AddedCmfyQue][nodeIdx:${task.nodeIdx}][queIdx:${que.size}]")
+    que.addLast(task)
+    return true
+  }
+
+  fun cnntCmfyAndSendMsg(queNo: Int, clientId: String) {
+    var uri: URI = getWebsocketUri(queNo, clientId)
+    val connection: WebSocketClientConnection = connector
+      .addHeader("Authorization", getCmfyAuthHead())
+      .baseUri(uri).pathParam("clientId", clientId)
+      .connectAndAwait()
+    connection.sendTextAndAwait("Hi!")
+  }
+
+  fun getWebsocketUri(idx: Int, clientId: String): URI {
+    return URI.create("ws://${getComfyHostNameAt(idx)}/ws?clientId=$clientId")
+  }
+
+  fun test() {
+    // 1. 워크플로우 template에 동적 파라미터 매핑
+    // 2. Rest 생성요청 큐잉
+//    var data = param.prompt
+//    hostJsonTpltLctr.locate("/'workflow/some-workflow.json")
+//    val cmfyRsps: Map<String, Any> = cmfyClnt.queuePrompt(cmfyHostChckDao.getCmfyAuthHead(), rqstParam)
+//    log.debug("[CmfyUiQueRsps] " + Gson().toJson(cmfyRsps))
+//
+//    // 3. Websocket => nedd to open to listen progress
+//    cnntCmfyAndSendMsg(que.nodeIdx, rqstParam.clientId)
+//    val ret = GnrtTextToImgRsps(
+//      clientId = rqstParam.clientId,
+//      stat = WbskCnst.ON_QUE_ADD
+//    )
+  }
 }

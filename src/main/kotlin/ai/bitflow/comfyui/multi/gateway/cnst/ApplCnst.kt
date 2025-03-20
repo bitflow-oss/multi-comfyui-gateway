@@ -12,6 +12,13 @@ object WbskCnst {
   const val ON_QUE_FULL = "full_of_queue"
 }
 
+object TaskStat {
+  const val REQUESTED = "requested"
+  const val IN_PROGRESS = "in_progress"
+  const val FINISHED = "finished"
+  const val ERROR = "error"
+}
+
 object JwtAuth {
   const val SIGN_IN = "AUTH0001"
 }

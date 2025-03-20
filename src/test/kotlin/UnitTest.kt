@@ -27,9 +27,6 @@ class UnitTest {
   lateinit var connector: WebSocketConnector<CmfyWbskClnt>
 
   @Inject
-  lateinit var gnrtJobSrvc: GnrtJobSrvc
-
-  @Inject
   lateinit var cmfyHostChckDao: CmfyHostChckDao
 
 
@@ -52,7 +49,7 @@ class UnitTest {
 //  @Test
   fun testWebsocketEndpoint() {
     val testClientId = "test-client-id"
-    var uri: URI = gnrtJobSrvc.getWebsocketUri(0, testClientId)
+    var uri: URI = cmfyHostChckDao.getWebsocketUri(0, testClientId)
     val connection: WebSocketClientConnection = connector
       .addHeader("Authorization", cmfyHostChckDao.getCmfyAuthHead())
       .baseUri(uri).pathParam("clientId", testClientId)

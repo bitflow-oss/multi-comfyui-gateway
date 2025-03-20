@@ -1,25 +1,26 @@
 package ai.bitflow.comfyui.multi.gateway.srvc
 
+import ai.bitflow.comfyui.multi.gateway.cnst.TaskStat
 import ai.bitflow.comfyui.multi.gateway.cnst.WbskCnst
 import ai.bitflow.comfyui.multi.gateway.dao.CmfyHostChckDao
 import ai.bitflow.comfyui.multi.gateway.dao.CmfyRestClnt
 import ai.bitflow.comfyui.multi.gateway.dao.CmfyWbskClnt
 import ai.bitflow.comfyui.multi.gateway.dao.HostJsonTpltLctr
 import ai.bitflow.comfyui.multi.gateway.data.CmfyQueInfo
-import ai.bitflow.comfyui.multi.gateway.data.CmfyTaskQue
-import ai.bitflow.comfyui.multi.gateway.excn.CmfyQueEctn
+import ai.bitflow.comfyui.multi.gateway.data.CmfyTaskItem
 import ai.bitflow.comfyui.multi.gateway.excn.NoNodeEctn
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rqst.GtwyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
 import ai.bitflow.comfyui.multi.gateway.rsps.QueStatRsps
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.google.gson.Gson
 import io.quarkus.qute.Engine
 import io.quarkus.websockets.next.WebSocketClientConnection
 import io.quarkus.websockets.next.WebSocketConnector
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import org.eclipse.microprofile.config.inject.ConfigProperty
-import org.eclipse.microprofile.rest.client.RestClientBuilder
 import org.jboss.logging.Logger
 import java.net.URI
 
@@ -34,19 +35,13 @@ class GnrtJobSrvc {
   lateinit var COMFYUI_MAX_QUE_SIZE_EACH: String
 
   @Inject
-  lateinit var connector: WebSocketConnector<CmfyWbskClnt>
-
-  @Inject
   lateinit var templateEngine: Engine
-
-  @Inject
-  lateinit var hostJsonTpltLctr: HostJsonTpltLctr
 
   @Inject
   lateinit var cmfyHostChckDao: CmfyHostChckDao
 
-  private var comfyUiQues: CmfyTaskQue? = null
-
+  @Inject
+  lateinit var hostJsonTpltLctr: HostJsonTpltLctr
 
   /**
    * API를 통한 ComfyUI 워크플로 호스팅
@@ -70,30 +65,17 @@ class GnrtJobSrvc {
    * 4. 프롬프트에 대해 생성된 이미지를 가져옵니다.
    * 5. 이미지를 로컬에 저장
    */
-  fun generateImages(inParam: GtwyTextToImgRqst): GnrtTextToImgRsps {
-
-    val que: CmfyQueInfo? = getBestQue()
-    if (que == null) {
-      throw NoNodeEctn()
-    }
-    val cmfyClnt: CmfyRestClnt = cmfyHostChckDao.getRestClient(que.queNo)
-    // 1. 워크플로우 template에 동적 파라미터 매핑
-//    var data = param.prompt
-//    hostJsonTpltLctr.locate("/'workflow/some-workflow.json")
-    var outParam = CmfyTextToImgRqst(
-      prompt = templateEngine.getTemplate("/'workflow/some-workflow.json").data("data", "").render(),
-      clientId = inParam.clientId
+  fun generateImages(inParam: GtwyTextToImgRqst): Boolean {
+    val jsonStrLoad = templateEngine.getTemplate("./workflow/some-workflow.json").data("data", "").render()
+    log.debug("[generateImages][jsonStrLoad] $jsonStrLoad")
+    val rqstParam = CmfyTextToImgRqst(
+      prompt = templateEngine.getTemplate("./workflow/some-workflow.json").data("data", "").render(),
+      clientId = inParam.clientId,
+      nodeIdx = -1,
+      taskStat = TaskStat.REQUESTED
     )
-    log.debug("prompt ${outParam.prompt}")
-    // 2. Rest 생성요청 큐잉
-    cmfyClnt.queuePrompt(cmfyHostChckDao.getCmfyAuthHead(), outParam)
-    // 3. Websocket => nedd to open to listen progress
-    cnntCmfyAndSendMsg(que.queNo, outParam.clientId)
-    var ret = GnrtTextToImgRsps(
-      clientId = outParam.clientId,
-      stat = WbskCnst.ON_QUE_ADD
-    )
-    return ret
+    log.debug("[CmfyUiQueRqst] " + Gson().toJson(rqstParam))
+    return cmfyHostChckDao.addCmfyTaskQue(rqstParam)
   }
 
   /**
@@ -101,51 +83,20 @@ class GnrtJobSrvc {
    * https://9elements.com/blog/hosting-a-comfyui-workflow-via-api/
    */
   fun getQueStat(): QueStatRsps? {
-    if (comfyUiQues == null || comfyUiQues!!.get.size < 1) {
-      return null
-    }
-    val size = comfyUiQues!!.get.size
-    var ret = QueStatRsps(size)
-    var totlCnt = 0
-    ret.que.forEachIndexed { idx, it ->
-      ret.que[idx] = comfyUiQues!!.get[idx].size
-      totlCnt += comfyUiQues!!.get[idx].size
-    }
-    ret.totlQueCnt = totlCnt
-    ret.avilQueCnt = comfyUiQues!!.get.size.times(COMFYUI_MAX_QUE_SIZE_EACH.toInt()) - totlCnt
-    return ret
-  }
 
-  private fun getBestQue(): CmfyQueInfo? {
-
-    if (cmfyHostChckDao.getComfyHostSize() < 1) {
-      cmfyHostChckDao.getComfyHost()
+    val queStat: List<ArrayDeque<CmfyTextToImgRqst>> = cmfyHostChckDao.getQueStat() ?: return null
+    val queSize = mutableListOf<Int>()
+    var totlQueUse = 0
+    queStat.forEach { it ->
+      queSize.add(it.size)
+      totlQueUse += it.size
     }
-    if (comfyUiQues == null || comfyUiQues!!.get.size < 1) {
-      return null
-    }
-    val minQueIdx = comfyUiQues!!.get.indexOf(comfyUiQues!!.get.minBy { it.size })
-    if (comfyUiQues!!.get[minQueIdx].size < COMFYUI_MAX_QUE_SIZE_EACH.toInt()) {
-      return CmfyQueInfo(
-        (minQueIdx + 1),
-        comfyUiQues!!.get[minQueIdx][comfyUiQues!!.get[minQueIdx].size]
-      )
-    } else {
-      throw CmfyQueEctn()
-    }
-  }
-
-  fun cnntCmfyAndSendMsg(queNo: Int, clientId: String) {
-    var uri: URI = getWebsocketUri(queNo, clientId)
-    val connection: WebSocketClientConnection = connector
-      .addHeader("Authorization", cmfyHostChckDao.getCmfyAuthHead())
-      .baseUri(uri).pathParam("clientId", clientId)
-      .connectAndAwait()
-    connection.sendTextAndAwait("Hi!")
-  }
-
-  fun getWebsocketUri(idx: Int, clientId: String): URI {
-    return URI.create("ws://${cmfyHostChckDao.getComfyHostNameAt(idx)}/ws?clientId=$clientId")
+    return QueStatRsps (
+      avilNodeCnt = queStat.size,
+      queSize = queSize,
+      totlQueCnt = queStat.size.times(COMFYUI_MAX_QUE_SIZE_EACH.toInt()),
+      avilQueCnt = queStat.size.times(COMFYUI_MAX_QUE_SIZE_EACH.toInt()) - totlQueUse
+    )
   }
 
 }

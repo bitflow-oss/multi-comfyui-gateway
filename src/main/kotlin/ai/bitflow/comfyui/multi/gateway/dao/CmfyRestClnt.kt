@@ -28,7 +28,7 @@ interface CmfyRestClnt {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("prompt")
   fun queuePrompt(@HeaderParam("Authorization") authorization: String
-                  , param: CmfyTextToImgRqst): String
+                  , param: CmfyTextToImgRqst): Map<String, Any>
 
   /**
    * Check Generation Progress (Polling)

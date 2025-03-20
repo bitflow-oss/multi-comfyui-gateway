@@ -1,7 +1,7 @@
 package ai.bitflow.comfyui.multi.gateway.endp
 
 import ai.bitflow.comfyui.multi.gateway.cnst.WbskCnst
-import ai.bitflow.comfyui.multi.gateway.excn.CmfyQueEctn
+import ai.bitflow.comfyui.multi.gateway.excn.FullQueEctn
 import ai.bitflow.comfyui.multi.gateway.rqst.GtwyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
 import ai.bitflow.comfyui.multi.gateway.srvc.GnrtJobSrvc
@@ -65,7 +65,7 @@ class WebSockEndp {
 
     log.debug("[WBSK] onError clientId / errMsg => ${getClientId(conn)} / ${e.message}")
 
-    if (e is CmfyQueEctn) {
+    if (e is FullQueEctn) {
       log.warn("[WBSK] Waiting linea are full")
       val ret1 = GnrtTextToImgRsps(
         clientId = getClientId(conn),
@@ -85,13 +85,12 @@ class WebSockEndp {
   }
 
   @OnTextMessage
-  fun onTextMessage(@PathParam clientId: String, param: GtwyTextToImgRqst, conn: WebSocketConnection): GnrtTextToImgRsps {
+  fun onTextMessage(@PathParam clientId: String, param: GtwyTextToImgRqst, conn: WebSocketConnection): Boolean {
     log.debug("[WBSK] onMessage param / clientId / conn => $param / $clientId / $conn")
     val queStat = gnrtJobSrvc.getQueStat()
-    var ret = gnrtJobSrvc.generateImages(param)
-    ret.que = queStat
+    val addSucc = gnrtJobSrvc.generateImages(param)
     connection.broadcast().sendText(queStat)
-    return ret
+    return addSucc
   }
 
   @OnBinaryMessage

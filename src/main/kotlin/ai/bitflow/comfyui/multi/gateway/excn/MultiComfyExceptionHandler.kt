@@ -18,7 +18,7 @@ class MultiComfyExceptionHandler : ExceptionMapper<NodeAndQueEctn> {
   override fun toResponse(e: NodeAndQueEctn): Response {
 
     var content: ComnRsps<Unit>? = null
-    if (e is CmfyQueEctn) {
+    if (e is FullQueEctn) {
       content = ComnRsps(
         code = HttpStatus.SC_NOT_ACCEPTABLE,
         msg = "ComfyUi queues are full")
@@ -38,7 +38,7 @@ open class NodeAndQueEctn : RuntimeException, Serializable {
   constructor()
 }
 
-class CmfyQueEctn : NodeAndQueEctn {
+class FullQueEctn : NodeAndQueEctn {
   constructor()
 }
 
