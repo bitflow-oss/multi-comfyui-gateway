@@ -41,6 +41,7 @@ nb-configuration.xml
 .certs/
 
 out/
-doc/
-docs/
-workflow/*
+/doc
+/docs
+/workflow/*
+!/workflow/sample-workflow.json
