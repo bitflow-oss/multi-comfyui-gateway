@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="run prod" type="QuarkusRunConfigurationType" factoryName="Quarkus">
-    <module name="comfyui-api-bridge.main" />
+    <module name="multi-comfyui-gateway.main" />
     <QsGradleRunConfiguration>
       <ExternalSystemSettings>
         <option name="executionName" />

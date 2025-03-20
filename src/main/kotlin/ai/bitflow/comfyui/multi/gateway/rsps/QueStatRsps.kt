@@ -1,14 +1,29 @@
 package ai.bitflow.comfyui.multi.gateway.rsps
 
-data class QueStatRsps (
-  var que1: Int = -1,
-  var que2: Int = -1,
-  var que3: Int = -1,
-  var que4: Int = -1,
-  var que5: Int = -1,
-  var que6: Int = -1,
-  var que7: Int = -1,
-  var que8: Int = -1,
-  var totlQueCnt: Int = -1,
+class QueStatRsps {
+
+  constructor(
+    queSize: Int,
+  ): super() {
+    this.queSize = queSize
+    this.que = Array(queSize) { -1 }
+  }
+
+//  constructor(
+//    queSize: Int = -1,
+//    que: Array<Int>,
+//    totlQueCnt: Int,
+//    avilQueCnt: Int
+//  ): super() {
+//    this.queSize = queSize
+//    this.que = que
+//    this.totlQueCnt = totlQueCnt
+//    this.avilQueCnt = avilQueCnt
+//  }
+
+  var queSize: Int = -1
+  var que: Array<Int> = Array(4) { -1 }
+  var totlQueCnt: Int = -1
   var avilQueCnt: Int = -1
-)
+
+}

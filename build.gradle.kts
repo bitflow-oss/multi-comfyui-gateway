@@ -16,13 +16,13 @@ repositories {
   mavenLocal()
 }
 
-val isLocal: String by project
 val quarkusPlatformGroupId: String by project
 val quarkusPlatformArtifactId: String by project
 val quarkusPlatformVersion: String by project
 
 dependencies {
 
+  implementation(kotlin("stdlib-jdk8"))
   implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
   implementation(enforcedPlatform("${quarkusPlatformGroupId}:quarkus-google-cloud-services-bom:${quarkusPlatformVersion}"))
   implementation(platform("com.google.cloud:libraries-bom:26.51.0"))
@@ -31,23 +31,21 @@ dependencies {
   implementation("io.quarkus:quarkus-rest-qute:$quarkusPlatformVersion")
   implementation("io.quarkus:quarkus-smallrye-jwt:$quarkusPlatformVersion")
   implementation("io.quarkus:quarkus-rest-jackson:$quarkusPlatformVersion")
-  implementation("io.quarkus:quarkus-mongodb-client:$quarkusPlatformVersion")
   implementation("io.quarkus:quarkus-websockets-next:$quarkusPlatformVersion")
   implementation("io.quarkus:quarkus-smallrye-jwt-build:$quarkusPlatformVersion")
   implementation("io.quarkus:quarkus-rest-client-jackson:$quarkusPlatformVersion")
   implementation("io.quarkus:quarkus-websockets-next-kotlin:$quarkusPlatformVersion")
-  implementation("io.quarkus:quarkus-mongodb-panache-kotlin:$quarkusPlatformVersion")
   implementation("org.apache.httpcomponents.core5:httpcore5:5.3.3")
 
   // google
   implementation("com.google.code.gson:gson:2.10.1")
 
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.12.1")
   testImplementation("io.quarkus:quarkus-junit5:$quarkusPlatformVersion")
   testImplementation("io.rest-assured:rest-assured:5.5.1")
-  implementation(kotlin("stdlib-jdk8"))
 }
 
-group = "ai.bitflow.comfyui.api.bridge"
+group = "ai.bitflow.comfyui.multi.gateway"
 version = "1.0.0-SNAPSHOT"
 
 java {

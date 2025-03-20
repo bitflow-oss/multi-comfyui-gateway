@@ -30,37 +30,77 @@ class GnrtJobSrvc {
   @Inject
   lateinit var connector: WebSocketConnector<CmfyWbskClnt>
 
-  @ConfigProperty(name = "quarkus.rest-client.comfy-api-1.url")
-  lateinit var CMFY_API_HOST_1: String
+  @ConfigProperty(name = "comfyui.instance.count")
+  lateinit var COMFYUI_INSTANCE_COUNT: String
 
-  @ConfigProperty(name = "quarkus.rest-client.comfy-api-2.url")
-  lateinit var CMFY_API_HOST_2: String
+  @ConfigProperty(name = "quarkus.rest-client.comfyui-1.url")
+  lateinit var COMFYI_HOST_1: String
 
-  @ConfigProperty(name = "quarkus.rest-client.comfy-api-3.url")
-  lateinit var CMFY_API_HOST_3: String
+  @ConfigProperty(name = "quarkus.rest-client.comfyui-2.url")
+  lateinit var COMFYI_HOST_2: String
 
-  @ConfigProperty(name = "quarkus.rest-client.comfy-api-4.url")
-  lateinit var CMFY_API_HOST_4: String
+  @ConfigProperty(name = "quarkus.rest-client.comfyui-3.url")
+  lateinit var COMFYI_HOST_3: String
+
+  @ConfigProperty(name = "quarkus.rest-client.comfyui-4.url")
+  lateinit var COMFYI_HOST_4: String
+
+  @ConfigProperty(name = "quarkus.rest-client.comfyui-5.url")
+  lateinit var COMFYI_HOST_5: String
+
+  @ConfigProperty(name = "quarkus.rest-client.comfyui-6.url")
+  lateinit var COMFYI_HOST_6: String
+
+  @ConfigProperty(name = "quarkus.rest-client.comfyui-7.url")
+  lateinit var COMFYI_HOST_7: String
+
+  @ConfigProperty(name = "quarkus.rest-client.comfyui-8.url")
+  lateinit var COMFYI_HOST_8: String
 
   @ConfigProperty(name = "comfyui.api.key")
   lateinit var CMFY_API_KEY: String
 
-  @ConfigProperty(name = "comfyui.max.queue.size")
-  lateinit var COMFYUI_MAX_QUEUE_SIZE: String
+  @ConfigProperty(name = "comfyui.max.queue.size.each")
+  lateinit var COMFYUI_MAX_QUE_SIZE_EACH: String
+
+  @ConfigProperty(name = "comfyui.max.queue.size.total")
+  lateinit var COMFYUI_MAX_QUE_SIZE_TOTL: String
 
   @Inject
   lateinit var templateEngine: Engine
 
-//  @Inject
-//  @Location("wkfw/flux1DevIniv.json")
-//  lateinit var flux1DevIniv: Template
-
   @Inject
   lateinit var hostJsonTpltLctr: HostJsonTpltLctr
 
-  private var taskQue = CmfyTaskQue()
+  private var comfyUiQues = CmfyTaskQue()
 
 
+  private fun getComfyHost(): Array<String?> {
+    val cnt = COMFYUI_INSTANCE_COUNT.toInt()
+    var ret = arrayOfNulls<String>(cnt)
+    for (i in 0..< cnt) {
+      when (i) {
+        0 -> ret[i] = COMFYI_HOST_1
+        1 -> ret[i] = COMFYI_HOST_2
+        2 -> ret[i] = COMFYI_HOST_3
+        3 -> ret[i] = COMFYI_HOST_4
+        4 -> ret[i] = COMFYI_HOST_5
+        5 -> ret[i] = COMFYI_HOST_6
+        6 -> ret[i] = COMFYI_HOST_7
+        7 -> ret[i] = COMFYI_HOST_8
+      }
+    }
+    return ret
+  }
+
+  private fun getComfyHostNameAt(idx: Int): String {
+    val hostName = getComfyHost()
+    if (idx < 0 || idx >= hostName.size) {
+      throw FullQueExtn()
+    } else {
+      return getComfyHost()[idx]!!
+    }
+  }
   /**
    * API를 통한 ComfyUI 워크플로 호스팅
    * https://9elements.com/blog/hosting-a-comfyui-workflow-via-api/
@@ -84,11 +124,8 @@ class GnrtJobSrvc {
    * 5. 이미지를 로컬에 저장
    */
   fun generateImages(param: GnrtTextToImgRqst): GnrtTextToImgRsps {
-    // find less queue address, but if all are > 2 no queue return null
+
     val que: CmfyQueInfo = getBestQue()
-    if (que.queNo < 1 || que.queNo > 4) {
-      throw FullQueExtn()
-    }
     val cmfyClnt: CmfyRestClnt = getRestClient(que.queNo)
     // 1. 워크플로우 template에 동적 파라미터 매핑
     var data = param.prompt
@@ -106,44 +143,35 @@ class GnrtJobSrvc {
     return ret
   }
 
-
-
   /**
    * API를 통한 ComfyUI 워크플로 호스팅
    * https://9elements.com/blog/hosting-a-comfyui-workflow-via-api/
    */
   fun getQueStat(): QueStatRsps {
-
-    var ret = QueStatRsps(
-      que1 = taskQue.get1.size,
-      que2 = taskQue.get2.size,
-      que3 = taskQue.get3.size,
-      que4 = taskQue.get4.size
-    )
-    ret.totlQueCnt = ret.que1 + ret.que2 + ret.que3 + ret.que4
-    ret.avilQueCnt = 8 - ret.que1 - ret.que2 - ret.que3 - ret.que4
+    val size = comfyUiQues.get.size
+    var ret = QueStatRsps(size)
+    var totlCnt = 0
+    ret.que.forEachIndexed { idx, it ->
+      ret.que[idx] = comfyUiQues.get[idx].size
+      totlCnt += comfyUiQues.get[idx].size
+    }
+    ret.totlQueCnt = totlCnt
+    ret.avilQueCnt = comfyUiQues.get.size.times(COMFYUI_MAX_QUE_SIZE_EACH.toInt()) - totlCnt
     return ret
   }
 
   private fun getBestQue(): CmfyQueInfo {
-    val queue = listOf(taskQue.get1, taskQue.get2, taskQue.get3, taskQue.get4)
-    val minQueIdx = queue.indexOf(queue.minBy { it.size })
-    if (queue[minQueIdx].size < COMFYUI_MAX_QUEUE_SIZE.toInt()) {
-      return CmfyQueInfo((minQueIdx + 1), queue[minQueIdx][queue[minQueIdx].size])
+    val minQueIdx = comfyUiQues.get.indexOf(comfyUiQues.get.minBy { it.size })
+    if (comfyUiQues.get[minQueIdx].size < COMFYUI_MAX_QUE_SIZE_EACH.toInt()) {
+      return CmfyQueInfo((minQueIdx + 1),
+                comfyUiQues.get[minQueIdx][comfyUiQues.get[minQueIdx].size])
     } else {
       return CmfyQueInfo(-1, null)
     }
   }
 
   fun cnntCmfyAndSendMsg(queNo: Int, clientId: String) {
-
-    var uri: URI? = null
-    if (queNo > 0 && queNo < 5) {
-      uri = getWebsocketUri(queNo, clientId)
-    } else {
-      throw FullQueExtn()
-    }
-
+    var uri: URI = getWebsocketUri(queNo, clientId)
     val connection: WebSocketClientConnection = connector
       .addHeader("Authorization", getCmfyAuthHead())
       .baseUri(uri).pathParam("clientId", clientId)
@@ -151,32 +179,18 @@ class GnrtJobSrvc {
     connection.sendTextAndAwait("Hi!")
   }
 
-  private fun getCmfyAuthHead(): String {
+  fun getCmfyAuthHead(): String {
     return "Bearer $CMFY_API_KEY"
   }
 
-  private fun getRestClient(cmfyHostIdx: Int): CmfyRestClnt {
+  fun getRestClient(idx: Int): CmfyRestClnt {
     return RestClientBuilder.newBuilder()
-      .baseUri(URI("http://${getHostName(cmfyHostIdx)}"))
+      .baseUri(URI("http://${getComfyHostNameAt(idx)}"))
       .build<CmfyRestClnt>(CmfyRestClnt::class.java)
   }
 
-  private fun getWebsocketUri(cmfyHostIdx: Int, clientId: String): URI {
-    return URI.create("ws://${getHostName(cmfyHostIdx)}/ws?clientId=$clientId")
-  }
-
-  private fun getHostName(cmfyHostIdx: Int): String {
-    if (cmfyHostIdx == 1) {
-      return CMFY_API_HOST_1
-    } else if (cmfyHostIdx == 2) {
-      return CMFY_API_HOST_2
-    } else if (cmfyHostIdx == 3) {
-      return CMFY_API_HOST_3
-    } else if (cmfyHostIdx == 4) {
-      return CMFY_API_HOST_4
-    } else {
-      throw FullQueExtn()
-    }
+  fun getWebsocketUri(idx: Int, clientId: String): URI {
+    return URI.create("ws://${getComfyHostNameAt(idx)}/ws?clientId=$clientId")
   }
 
 }

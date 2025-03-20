@@ -1,14 +1,11 @@
 package ai.bitflow.comfyui.multi.gateway.data
 
 class CmfyTaskQue {
-  var get1 = mutableListOf<MutableMap<String, CmfyTaskItem>>()
-  var get2 = mutableListOf<MutableMap<String, CmfyTaskItem>>()
-  var get3 = mutableListOf<MutableMap<String, CmfyTaskItem>>()
-  var get4 = mutableListOf<MutableMap<String, CmfyTaskItem>>()
-  var get5 = mutableListOf<MutableMap<String, CmfyTaskItem>>()
-  var get6 = mutableListOf<MutableMap<String, CmfyTaskItem>>()
-  var get7 = mutableListOf<MutableMap<String, CmfyTaskItem>>()
-  var get8 = mutableListOf<MutableMap<String, CmfyTaskItem>>()
+  /**
+   * Data Structures in Kotlin: Stack & Queue — [PartV]
+   * https://medium.com/wearejaya/data-structures-in-kotlin-stack-queue-partv-31771dafa89
+   */
+  var get = arrayOf<ArrayDeque<MutableMap<String, CmfyTaskItem>>>()
 }
 
 data class CmfyTaskItem(
@@ -19,6 +16,6 @@ data class CmfyTaskItem(
 )
 
 data class CmfyQueInfo(
-  var queNo: Int = 0,
+  var queNo: Int = -1,
   var queItem: MutableMap<String, CmfyTaskItem>? = mutableMapOf()
 )

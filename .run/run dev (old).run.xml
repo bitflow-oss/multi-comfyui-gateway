@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run dev" type="QuarkusRunConfigurationType" factoryName="Quarkus">
-    <module name="comfyui-api-bridge.main" />
+  <configuration default="false" name="run dev (old)" type="QuarkusRunConfigurationType" factoryName="Quarkus">
+    <module name="multi-comfyui-gateway.main" />
     <QsGradleRunConfiguration>
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -11,9 +11,7 @@
           <list />
         </option>
         <option name="taskNames">
-          <list>
-            <option value="quarkusDev" />
-          </list>
+          <list />
         </option>
         <option name="vmOptions" />
       </ExternalSystemSettings>

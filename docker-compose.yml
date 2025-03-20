@@ -7,7 +7,7 @@ services:
     container_name: multi-comfyui-gateway
     image: bitflowinc/multi-comfyui-gateway:latest
     env_file:
-      - images.env
+      - comfyui.env
     volumes:
       - "./workflows:/app/user/default/workflows"
     ports:
