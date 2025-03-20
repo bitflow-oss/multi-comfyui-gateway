@@ -1,0 +1,14 @@
+services:
+  multi-comfyui-gateway:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+    tty: true
+    container_name: multi-comfyui-gateway
+    image: bitflowinc/multi-comfyui-gateway:latest
+    env_file:
+      - images.env
+    volumes:
+      - "./workflows:/app/user/default/workflows"
+    ports:
+      - "9000:8080"
