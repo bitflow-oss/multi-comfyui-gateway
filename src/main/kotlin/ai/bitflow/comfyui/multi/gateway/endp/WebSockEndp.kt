@@ -1,7 +1,7 @@
 package ai.bitflow.comfyui.multi.gateway.endp
 
 import ai.bitflow.comfyui.multi.gateway.cnst.WbskCnst
-import ai.bitflow.comfyui.multi.gateway.extn.FullNodeAndQueExtn
+import ai.bitflow.comfyui.multi.gateway.excn.CmfyQueEctn
 import ai.bitflow.comfyui.multi.gateway.rqst.GtwyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
 import ai.bitflow.comfyui.multi.gateway.srvc.GnrtJobSrvc
@@ -65,7 +65,7 @@ class WebSockEndp {
 
     log.debug("[WBSK] onError clientId / errMsg => ${getClientId(conn)} / ${e.message}")
 
-    if (e is FullNodeAndQueExtn) {
+    if (e is CmfyQueEctn) {
       log.warn("[WBSK] Waiting linea are full")
       val ret1 = GnrtTextToImgRsps(
         clientId = getClientId(conn),

@@ -1,7 +1,7 @@
 package ai.bitflow.comfyui.multi.gateway.dao
 
 import ai.bitflow.comfyui.multi.gateway.cnst.WbskCnst
-import ai.bitflow.comfyui.multi.gateway.extn.FullNodeAndQueExtn
+import ai.bitflow.comfyui.multi.gateway.excn.CmfyQueEctn
 import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
 import ai.bitflow.comfyui.multi.gateway.srvc.GnrtJobSrvc
 import io.quarkus.websockets.next.*
@@ -47,7 +47,7 @@ class CmfyWbskClnt {
 
     log.debug("[WBSK-CLNT] onError => ${e.message}")
 
-    if (e is FullNodeAndQueExtn) {
+    if (e is CmfyQueEctn) {
       log.warn("[WBSK-CLNT] Waiting linea are full")
       val ret1 = GnrtTextToImgRsps(
         clientId = "",

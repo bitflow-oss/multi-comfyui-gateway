@@ -2,6 +2,7 @@ package ai.bitflow.comfyui.multi.gateway.dao
 
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyUpldImgRqst
+import ai.bitflow.comfyui.multi.gateway.rsps.CmfyGetQueRsps
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
@@ -17,6 +18,11 @@ import org.jboss.resteasy.reactive.RestQuery
 @Path("ws")
 @RegisterRestClient
 interface CmfyRestClnt {
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("prompt")
+  fun getQueuePrompt(@HeaderParam("Authorization") authorization: String): CmfyGetQueRsps
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)

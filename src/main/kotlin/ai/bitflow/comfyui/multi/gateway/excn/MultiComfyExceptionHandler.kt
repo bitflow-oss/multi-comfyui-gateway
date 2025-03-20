@@ -1,4 +1,4 @@
-package ai.bitflow.comfyui.multi.gateway.extn
+package ai.bitflow.comfyui.multi.gateway.excn
 
 import ai.bitflow.comfyui.multi.gateway.rsps.ComnRsps
 import jakarta.inject.Inject
@@ -10,19 +10,19 @@ import org.jboss.logging.Logger
 import java.io.Serializable
 
 @Provider
-class MultiComfyExceptionHandler : ExceptionMapper<NodeAndQueExtn> {
+class MultiComfyExceptionHandler : ExceptionMapper<NodeAndQueEctn> {
 
   @Inject
   lateinit var log: Logger
 
-  override fun toResponse(e: NodeAndQueExtn): Response {
+  override fun toResponse(e: NodeAndQueEctn): Response {
 
     var content: ComnRsps<Unit>? = null
-    if (e is FullNodeAndQueExtn) {
+    if (e is CmfyQueEctn) {
       content = ComnRsps(
         code = HttpStatus.SC_NOT_ACCEPTABLE,
         msg = "ComfyUi queues are full")
-    } else if (e is NoNodeExtnNodeAnd) {
+    } else if (e is NoNodeEctn) {
       content = ComnRsps(
         code = HttpStatus.SC_NOT_ACCEPTABLE,
         msg = "No ComfyUi nodes found")
@@ -34,14 +34,14 @@ class MultiComfyExceptionHandler : ExceptionMapper<NodeAndQueExtn> {
 
 }
 
-open class NodeAndQueExtn : RuntimeException, Serializable {
+open class NodeAndQueEctn : RuntimeException, Serializable {
   constructor()
 }
 
-class FullNodeAndQueExtn : NodeAndQueExtn {
+class CmfyQueEctn : NodeAndQueEctn {
   constructor()
 }
 
-class NoNodeExtnNodeAnd : NodeAndQueExtn {
+class NoNodeEctn : NodeAndQueEctn {
   constructor()
 }

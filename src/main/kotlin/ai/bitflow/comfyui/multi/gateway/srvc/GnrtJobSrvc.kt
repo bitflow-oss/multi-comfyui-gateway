@@ -6,8 +6,8 @@ import ai.bitflow.comfyui.multi.gateway.dao.CmfyWbskClnt
 import ai.bitflow.comfyui.multi.gateway.dao.HostJsonTpltLctr
 import ai.bitflow.comfyui.multi.gateway.data.CmfyQueInfo
 import ai.bitflow.comfyui.multi.gateway.data.CmfyTaskQue
-import ai.bitflow.comfyui.multi.gateway.extn.FullNodeAndQueExtn
-import ai.bitflow.comfyui.multi.gateway.extn.NoNodeExtnNodeAnd
+import ai.bitflow.comfyui.multi.gateway.excn.CmfyQueEctn
+import ai.bitflow.comfyui.multi.gateway.excn.NoNodeEctn
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rqst.GtwyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
@@ -74,8 +74,15 @@ class GnrtJobSrvc {
   @Inject
   lateinit var hostJsonTpltLctr: HostJsonTpltLctr
 
-  private var comfyUiQues = CmfyTaskQue()
+  private var comfyUiQues: CmfyTaskQue? = null
 
+  private fun getComfyUiQues() {
+    val queDefn = getComfyHost()
+    queDefn.forEachIndexed { i, it ->
+      val cmfyClnt: CmfyRestClnt = getRestClient(i)
+      cmfyClnt.getQueuePrompt(getCmfyAuthHead())
+    }
+  }
 
   private fun getComfyHost(): Array<String?> {
     val cnt = COMFYUI_INSTANCE_COUNT.toInt()
@@ -98,11 +105,12 @@ class GnrtJobSrvc {
   private fun getComfyHostNameAt(idx: Int): String {
     val hostName = getComfyHost()
     if (idx < 0 || idx >= hostName.size) {
-      throw FullNodeAndQueExtn()
+      throw CmfyQueEctn()
     } else {
       return getComfyHost()[idx]!!
     }
   }
+
   /**
    * API를 통한 ComfyUI 워크플로 호스팅
    * https://9elements.com/blog/hosting-a-comfyui-workflow-via-api/
@@ -127,7 +135,10 @@ class GnrtJobSrvc {
    */
   fun generateImages(inParam: GtwyTextToImgRqst): GnrtTextToImgRsps {
 
-    val que: CmfyQueInfo = getBestQue()
+    val que: CmfyQueInfo? = getBestQue()
+    if (que == null) {
+      throw NoNodeEctn()
+    }
     val cmfyClnt: CmfyRestClnt = getRestClient(que.queNo)
     // 1. 워크플로우 template에 동적 파라미터 매핑
 //    var data = param.prompt
@@ -152,28 +163,34 @@ class GnrtJobSrvc {
    * API를 통한 ComfyUI 워크플로 호스팅
    * https://9elements.com/blog/hosting-a-comfyui-workflow-via-api/
    */
-  fun getQueStat(): QueStatRsps {
-    val size = comfyUiQues.get.size
+  fun getQueStat(): QueStatRsps? {
+    if (comfyUiQues == null || comfyUiQues!!.get.size < 1) {
+      return null
+    }
+    val size = comfyUiQues!!.get.size
     var ret = QueStatRsps(size)
     var totlCnt = 0
     ret.que.forEachIndexed { idx, it ->
-      ret.que[idx] = comfyUiQues.get[idx].size
-      totlCnt += comfyUiQues.get[idx].size
+      ret.que[idx] = comfyUiQues!!.get[idx].size
+      totlCnt += comfyUiQues!!.get[idx].size
     }
     ret.totlQueCnt = totlCnt
-    ret.avilQueCnt = comfyUiQues.get.size.times(COMFYUI_MAX_QUE_SIZE_EACH.toInt()) - totlCnt
+    ret.avilQueCnt = comfyUiQues!!.get.size.times(COMFYUI_MAX_QUE_SIZE_EACH.toInt()) - totlCnt
     return ret
   }
 
-  private fun getBestQue(): CmfyQueInfo {
-    val minQueIdx = comfyUiQues.get.indexOf(comfyUiQues.get.minBy { it.size })
-    if (comfyUiQues.get[minQueIdx].size < COMFYUI_MAX_QUE_SIZE_EACH.toInt()) {
-      return CmfyQueInfo((minQueIdx + 1),
-                comfyUiQues.get[minQueIdx][comfyUiQues.get[minQueIdx].size])
-    } else if (comfyUiQues.get.size < 1) {
-      throw NoNodeExtnNodeAnd()
+  private fun getBestQue(): CmfyQueInfo? {
+    if (comfyUiQues == null || comfyUiQues!!.get.size < 1) {
+      return null
+    }
+    val minQueIdx = comfyUiQues!!.get.indexOf(comfyUiQues!!.get.minBy { it.size })
+    if (comfyUiQues!!.get[minQueIdx].size < COMFYUI_MAX_QUE_SIZE_EACH.toInt()) {
+      return CmfyQueInfo(
+        (minQueIdx + 1),
+        comfyUiQues!!.get[minQueIdx][comfyUiQues!!.get[minQueIdx].size]
+      )
     } else {
-      throw FullNodeAndQueExtn()
+      throw CmfyQueEctn()
     }
   }
 
