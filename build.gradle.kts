@@ -40,6 +40,7 @@ dependencies {
 
   // google
   implementation("com.google.code.gson:gson:2.10.1")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
 
   testImplementation("io.quarkus:quarkus-junit5:$quarkusPlatformVersion")
   testImplementation("io.rest-assured:rest-assured:5.5.1")

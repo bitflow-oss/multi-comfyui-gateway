@@ -2,7 +2,6 @@ package ai.bitflow.comfyui.multi.gateway.dao
 
 import ai.bitflow.comfyui.multi.gateway.cnst.WbskCnst
 import ai.bitflow.comfyui.multi.gateway.data.CmfyQueInfo
-import ai.bitflow.comfyui.multi.gateway.data.CmfyTaskItem
 import ai.bitflow.comfyui.multi.gateway.excn.FullQueEctn
 import ai.bitflow.comfyui.multi.gateway.excn.NoNodeEctn
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyTextToImgRqst
@@ -13,6 +12,7 @@ import io.quarkus.websockets.next.WebSocketClientConnection
 import io.quarkus.websockets.next.WebSocketConnector
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
+import kotlinx.serialization.json.*
 import org.eclipse.microprofile.config.inject.ConfigProperty
 import org.eclipse.microprofile.rest.client.RestClientBuilder
 import org.jboss.logging.Logger
@@ -166,10 +166,21 @@ class CmfyHostChckDao {
   fun pullQue(nodeIdx: Int): GnrtTextToImgRsps? {
     val item: CmfyTextToImgRqst = this.comfyUiQues[nodeIdx].removeFirst()
     val cmfyClnt: CmfyRestClnt = getRestClient(nodeIdx)
-    val cmfyRsps: Map<String, Any> = cmfyClnt.queuePrompt(getCmfyAuthHead(), item)
+    val paramMap = mutableMapOf<String, JsonElement>()
+    paramMap["prompt"] = item.prompt!!
+    paramMap["client_id"] = JsonPrimitive(item.client_id)
+    val param = JsonObject(paramMap)
+    log.debug("[cmfyRqst] $param")
+    var cmfyRsps: Map<String, Any>?=  null
+    try {
+      cmfyRsps = cmfyClnt.queuePrompt(getCmfyAuthHead(), param)
+      log.debug("[cmgyRsps] $cmfyRsps")
+    } catch (e: Exception) {
+      e.printStackTrace()
+    }
 //    cnntCmfyAndSendMsg(nodeIdx, item.clientId)
     val ret = GnrtTextToImgRsps(
-      clientId = item.clientId,
+      clientId = item.client_id,
       stat = WbskCnst.ON_QUE_ADD
     )
     return ret
@@ -181,8 +192,10 @@ class CmfyHostChckDao {
 
   fun addCmfyTaskQue(task: CmfyTextToImgRqst): Boolean {
     val que: ArrayDeque<CmfyTextToImgRqst> = getBestQue(task) ?: throw FullQueEctn()
-    log.debug("[AddedCmfyQue][nodeIdx:${task.nodeIdx}][queIdx:${que.size}]")
+    log.debug("[AddedCmfyQue][nodeIdx:${task.nodeIdx}][queIdx:${que.size}][param:${task.prompt}]")
     que.addLast(task)
+    // Todo: 임시,
+    pullQue(task.nodeIdx)
     return true
   }
 

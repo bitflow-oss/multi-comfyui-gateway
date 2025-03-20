@@ -29,7 +29,12 @@ class RestFulEndp {
   @Path("prompt")
   fun queuePrompt(param: GtwyTextToImgRqst, req: HttpServerRequest): ComnRsps<Boolean> {
     log.debug("[queuePrompt] $param")
-    val ret: Boolean = gnrtJobSrvc.generateImages(param)
+    var ret = false
+    try {
+       ret = gnrtJobSrvc.generateImages(param)
+    } catch (e: Exception) {
+      e.printStackTrace()
+    }
     return ComnRsps(ret)
   }
 

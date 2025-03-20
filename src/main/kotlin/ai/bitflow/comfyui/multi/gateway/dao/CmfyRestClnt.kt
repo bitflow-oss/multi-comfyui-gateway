@@ -3,9 +3,14 @@ package ai.bitflow.comfyui.multi.gateway.dao
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyUpldImgRqst
 import ai.bitflow.comfyui.multi.gateway.rsps.CmfyGetQueRsps
+import io.netty.buffer.ByteBufInputStream
+import io.quarkus.rest.client.reactive.ClientExceptionMapper
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import org.apache.hc.core5.http.HttpStatus
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient
 import org.jboss.resteasy.reactive.RestPath
 import org.jboss.resteasy.reactive.RestQuery
@@ -28,7 +33,7 @@ interface CmfyRestClnt {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("prompt")
   fun queuePrompt(@HeaderParam("Authorization") authorization: String
-                  , param: CmfyTextToImgRqst): Map<String, Any>
+                  , param: JsonObject): Map<String, Any>
 
   /**
    * Check Generation Progress (Polling)
@@ -58,5 +63,18 @@ interface CmfyRestClnt {
   @Path("upload/image")
   fun uploadImage(@HeaderParam("Authorization") authorization: String
                   , param: CmfyUpldImgRqst): Response
+
+  companion object {
+    @JvmStatic
+    @ClientExceptionMapper
+    fun toException(response: Response): RuntimeException? {
+      if (response.status != HttpStatus.SC_OK) {
+        val failEntt: ByteBufInputStream = response.entity as ByteBufInputStream
+        val errMsg = failEntt.readLine()
+        println("[failRsps:${response.status}] $errMsg")
+      }
+      return null
+    }
+  }
 
 }

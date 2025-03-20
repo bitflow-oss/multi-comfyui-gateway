@@ -85,12 +85,12 @@ class WebSockEndp {
   }
 
   @OnTextMessage
-  fun onTextMessage(@PathParam clientId: String, param: GtwyTextToImgRqst, conn: WebSocketConnection): Boolean {
+  fun onTextMessage(@PathParam clientId: String, param: GtwyTextToImgRqst, conn: WebSocketConnection): String {
     log.debug("[WBSK] onMessage param / clientId / conn => $param / $clientId / $conn")
     val queStat = gnrtJobSrvc.getQueStat()
     val addSucc = gnrtJobSrvc.generateImages(param)
     connection.broadcast().sendText(queStat)
-    return addSucc
+    return addSucc.toString()
   }
 
   @OnBinaryMessage
