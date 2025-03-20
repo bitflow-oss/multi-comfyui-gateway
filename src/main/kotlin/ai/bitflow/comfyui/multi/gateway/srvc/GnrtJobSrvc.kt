@@ -16,6 +16,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import org.eclipse.microprofile.config.inject.ConfigProperty
 import org.jboss.logging.Logger
+import org.jose4j.json.internal.json_simple.JSONObject
 import java.io.File
 import java.security.SecureRandom
 
@@ -69,13 +70,13 @@ class GnrtJobSrvc {
     log.debug("[generateImages][jsonPath] $jsonPath")
     inParam.seed = Math.abs(SecureRandom.getInstanceStrong().nextInt()).toString()
     val jsonTplt = templateEngine.getTemplate(jsonPath).data("data", inParam).render()
-//    val jsonTpltMod = jsonTplt.replace("\n", "").replace("\\\"", "\"")
-//    val objectMapper = ObjectMapper()
-//    var jsonJsonObjt = objectMapper.readTree(jsonTplt)
-    val jsonJsonObjt = Json.parseToJsonElement(jsonTplt).jsonObject
-    log.debug("[generateImages][jsonStrLoad] $jsonJsonObjt")
+    val objectMapper = ObjectMapper()
+    var jsonParam = objectMapper.readValue(jsonTplt, JSONObject::class.java)
+//    val jsonJsonObjt = Json.parseToJsonElement(jsonTplt).jsonObject
+//    val jsonParam = Gson().fromJson(jsonTplt, com.google.gson.JsonObject::class.java)
+    log.debug("[generateImages][jsonStrLoad] $jsonParam")
     val rqstParam = CmfyTextToImgRqst(
-      prompt = jsonJsonObjt, // Gson().fromJson(jsonTplt, LinkedTreeMap::class.java),
+      prompt = jsonParam, // Gson().fromJson(jsonTplt, LinkedTreeMap::class.java),
       client_id = inParam.clientId,
       nodeIdx = -1,
       taskStat = TaskStat.REQUESTED

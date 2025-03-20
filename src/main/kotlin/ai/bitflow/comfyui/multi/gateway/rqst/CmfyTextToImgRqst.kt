@@ -1,13 +1,10 @@
 package ai.bitflow.comfyui.multi.gateway.rqst
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
+import org.jose4j.json.internal.json_simple.JSONObject
 
 
 data class CmfyTextToImgRqst(
-  @Serializable
-  var prompt: JsonObject? = null,
-  @Serializable
+  var prompt: JSONObject? = null,
   var client_id: String,
   var nodeIdx: Int = -1,
   var taskStat: String? = null

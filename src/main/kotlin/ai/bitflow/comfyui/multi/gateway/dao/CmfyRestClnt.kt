@@ -3,6 +3,7 @@ package ai.bitflow.comfyui.multi.gateway.dao
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyUpldImgRqst
 import ai.bitflow.comfyui.multi.gateway.rsps.CmfyGetQueRsps
+import ai.bitflow.comfyui.multi.gateway.rsps.CmfyQuePmptRsps
 import io.netty.buffer.ByteBufInputStream
 import io.quarkus.rest.client.reactive.ClientExceptionMapper
 import jakarta.ws.rs.*
@@ -33,7 +34,7 @@ interface CmfyRestClnt {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("prompt")
   fun queuePrompt(@HeaderParam("Authorization") authorization: String
-                  , param: JsonObject): Map<String, Any>
+                  , param: CmfyTextToImgRqst): CmfyQuePmptRsps
 
   /**
    * Check Generation Progress (Polling)

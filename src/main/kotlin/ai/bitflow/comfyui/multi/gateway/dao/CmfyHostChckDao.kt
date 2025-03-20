@@ -166,14 +166,10 @@ class CmfyHostChckDao {
   fun pullQue(nodeIdx: Int): GnrtTextToImgRsps? {
     val item: CmfyTextToImgRqst = this.comfyUiQues[nodeIdx].removeFirst()
     val cmfyClnt: CmfyRestClnt = getRestClient(nodeIdx)
-    val paramMap = mutableMapOf<String, JsonElement>()
-    paramMap["prompt"] = item.prompt!!
-    paramMap["client_id"] = JsonPrimitive(item.client_id)
-    val param = JsonObject(paramMap)
-    log.debug("[cmfyRqst] $param")
-    var cmfyRsps: Map<String, Any>?=  null
+    log.debug("[cmfyRqst] $item")
+    var cmfyRsps: Map<String, Any>?
     try {
-      cmfyRsps = cmfyClnt.queuePrompt(getCmfyAuthHead(), param)
+      cmfyRsps = cmfyClnt.queuePrompt(getCmfyAuthHead(), item)
       log.debug("[cmgyRsps] $cmfyRsps")
     } catch (e: Exception) {
       e.printStackTrace()
