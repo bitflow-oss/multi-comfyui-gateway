@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="dev run" type="QuarkusRunConfiguration" factoryName="QuarkusRunConfiguration">
+  <configuration default="false" name="run dev" type="QuarkusRunConfiguration" factoryName="QuarkusRunConfiguration">
     <module name="multi-comfyui-gateway.main" />
     <option name="profile" />
     <method v="2" />

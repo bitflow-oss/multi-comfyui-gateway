@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="build native cmd" type="ShConfigurationType">
+  <configuration default="false" name="windows native build test 1" type="ShConfigurationType">
     <option name="SCRIPT_TEXT" value="cmd /c call &quot;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat&quot; &amp;&amp; quarkus build --native" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />

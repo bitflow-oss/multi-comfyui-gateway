@@ -6,6 +6,8 @@ import io.quarkus.websockets.next.WebSocketConnector
 import io.quarkus.websockets.next.runtime.WebSocketClientRecorder.ClientEndpoint
 import io.restassured.RestAssured
 import jakarta.inject.Inject
+import org.jboss.logging.Logger
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.net.URI
 import java.util.concurrent.TimeUnit
@@ -18,6 +20,9 @@ import java.util.concurrent.TimeUnit
 class UnitTest {
 
   @Inject
+  lateinit var log: Logger
+
+  @Inject
   lateinit var connector: WebSocketConnector<CmfyWbskClnt>
 
   @Inject
@@ -26,16 +31,18 @@ class UnitTest {
 
   @Test
   fun testWebPageEndpoint() {
-    RestAssured.given()
+    val res = RestAssured.given()
       .`when`().get("/view/status").then()
       .statusCode(200).log().all().extract()
+    log.debug("testWebPageEndpoint res: $res")
   }
 
   @Test
   fun testRestEndpoint() {
-    RestAssured.given()
+    val res = RestAssured.given()
       .`when`().get("/history/test-prompt-id").then()
       .statusCode(200).log().all().extract()
+    log.debug("testRestEndpoint res: $res")
   }
 
   @Test
@@ -46,8 +53,9 @@ class UnitTest {
       .addHeader("Authorization", gnrtJobSrvc.getCmfyAuthHead())
       .baseUri(uri).pathParam("clientId", testClientId)
       .connectAndAwait()
+    log.debug("testWebsocketEndpoint")
     // Ping messages are sent automatically
-//    assertTrue(ClientEndpoint.PONG.await(5, TimeUnit.SECONDS));
+//    Assertions.assertTrue(ClientEndpoint.await(5, TimeUnit.SECONDS));
   }
 
 }

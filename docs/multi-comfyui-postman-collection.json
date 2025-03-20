@@ -1,0 +1,388 @@
+{
+	"info": {
+		"_postman_id": "551e9140-0f35-4f64-84c7-28df583337a3",
+		"name": "ComfyUI built-in",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21765113",
+		"_collection_link": "https://bitflow-ai.postman.co/workspace/%5BGenerated%5D-2023.07.--~fe174505-ff63-48f1-bf8e-ee4d5175f9ca/collection/21765113-551e9140-0f35-4f64-84c7-28df583337a3?action=share&source=collection_link&creator=21765113"
+	},
+	"item": [
+		{
+			"name": "get extensions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{comfyui-host}}/extensions",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"extensions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get empeddings",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{comfyui-host}}/embeddings",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"embeddings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get remaining prompt",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{comfyui-host}}/prompt",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"prompt"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "generate image with prompt (bitflow)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"prompt\": {\r\n        \"3\": {\r\n            \"inputs\": {\r\n                \"seed\": 23823913432,\r\n                \"steps\": 35,\r\n                \"cfg\": 7,\r\n                \"sampler_name\": \"heun\",\r\n                \"scheduler\": \"normal\",\r\n                \"denoise\": 1,\r\n                \"model\": [\r\n                    \"4\",\r\n                    0\r\n                ],\r\n                \"positive\": [\r\n                    \"6\",\r\n                    0\r\n                ],\r\n                \"negative\": [\r\n                    \"7\",\r\n                    0\r\n                ],\r\n                \"latent_image\": [\r\n                    \"14\",\r\n                    0\r\n                ]\r\n            },\r\n            \"class_type\": \"KSampler\",\r\n            \"_meta\": {\r\n                \"title\": \"KSampler\"\r\n            }\r\n        },\r\n        \"4\": {\r\n            \"inputs\": {\r\n                \"ckpt_name\": \"cyberrealisticPony_v7.safetensors\"\r\n            },\r\n            \"class_type\": \"CheckpointLoaderSimple\",\r\n            \"_meta\": {\r\n                \"title\": \"체크포인트 로드\"\r\n            }\r\n        },\r\n        \"6\": {\r\n            \"inputs\": {\r\n                \"text\": \"score_9, score_8_up, score_8_up, super detailed, super high resolution, photo, realistic, photorealistic, 1girl, beautiful, outdoors, A black man and a beautyful Korean k-pop idol girl in her 20s, black, mid to late 40s man is having anal sex from behind of her, one of his hand is on the woman's buttock top, his 30cm long strongly erected cock inserts into her hairy pussy, all on all fours, bent over, the woman grits her teeth, she has extremely painful face, shaved pussy, no smile, mouth is shut, full of cumshot on her buttock top, completely naked, Beautifully decorated purple floral wallpaper in the room, retro film colors, complete shape of vagina and dick. low color saturation. soft light\",\r\n                \"clip\": [\r\n                    \"4\",\r\n                    1\r\n                ]\r\n            },\r\n            \"class_type\": \"CLIPTextEncode\",\r\n            \"_meta\": {\r\n                \"title\": \"CLIP Text Encode (POSITIVE 프롬프트)\"\r\n            }\r\n        },\r\n        \"7\": {\r\n            \"inputs\": {\r\n                \"text\": \"glowing skin, reflect light on skin, grossy skin, bad human anatomy, penis to woman, vagina to man, 1 leg, 1 hand, 3 legs, 3 hands, 2 person's combined body, 2 codk, 2 dick, 2 penis, high saturation, blurry face, blurry eyes, teenagers, high color saturation,\\nscore_6, score_5, score_4, fcNeg, simple background, blur, low quality,  fairy wings, elf ears, censored , cross-eyed, lazy eye, bucktooth, cartoon, ugly, anime, burned, sunburned, ghostly, deformed, dismembered, disembodied, detached, fat, chubby, polydactyl, amputated, contorted, flat-chest, disfigured hands, ugly fingers, ugly hands\",\r\n                \"clip\": [\r\n                    \"4\",\r\n                    1\r\n                ]\r\n            },\r\n            \"class_type\": \"CLIPTextEncode\",\r\n            \"_meta\": {\r\n                \"title\": \"CLIP Text Encode (네거티브 프롬프트)\"\r\n            }\r\n        },\r\n        \"14\": {\r\n            \"inputs\": {\r\n                \"width\": 1280,\r\n                \"height\": 800,\r\n                \"batch_size\": 1\r\n            },\r\n            \"class_type\": \"EmptyLatentImage\",\r\n            \"_meta\": {\r\n                \"title\": \"빈 잠재 이미지\"\r\n            }\r\n        },\r\n        \"30\": {\r\n            \"inputs\": {\r\n                \"vae_name\": \"ponyStandardVAE_v10.safetensors\"\r\n            },\r\n            \"class_type\": \"VAELoader\",\r\n            \"_meta\": {\r\n                \"title\": \"VAE 로드\"\r\n            }\r\n        },\r\n        \"31\": {\r\n            \"inputs\": {\r\n                \"action\": \"append\",\r\n                \"tidy_tags\": \"yes\",\r\n                \"text_a\": \"score_9, score_8_up, score_8_up, super detailed, super high resolution, photo, realistic, photorealistic,\",\r\n                \"text_b\": \"\",\r\n                \"text_c\": \"\"\r\n            },\r\n            \"class_type\": \"StringFunction|pysssss\",\r\n            \"_meta\": {\r\n                \"title\": \"String Function 🐍\"\r\n            }\r\n        },\r\n        \"37\": {\r\n            \"inputs\": {\r\n                \"samples\": [\r\n                    \"3\",\r\n                    0\r\n                ],\r\n                \"vae\": [\r\n                    \"30\",\r\n                    0\r\n                ]\r\n            },\r\n            \"class_type\": \"VAEDecode\",\r\n            \"_meta\": {\r\n                \"title\": \"VAE 디코드\"\r\n            }\r\n        },\r\n        \"38\": {\r\n            \"inputs\": {\r\n                \"sharpen_radius\": 1,\r\n                \"sigma\": 1.0000000000000002,\r\n                \"alpha\": 1.0000000000000002\r\n            },\r\n            \"class_type\": \"ImageSharpen\",\r\n            \"_meta\": {\r\n                \"title\": \"이미지 선명화\"\r\n            }\r\n        },\r\n        \"39\": {\r\n            \"inputs\": {\r\n                \"filename_prefix\": \"gen8-ponyv6-%F-%H-%M-$S\",\r\n                \"filename_keys\": \"ckpt_name, models, steps, cfg, \",\r\n                \"foldername_prefix\": \"\",\r\n                \"foldername_keys\": \"\",\r\n                \"delimiter\": \"-\",\r\n                \"save_job_data\": \"basic, prompt\",\r\n                \"job_data_per_image\": false,\r\n                \"job_custom_text\": \"\",\r\n                \"save_metadata\": false,\r\n                \"counter_digits\": 4,\r\n                \"counter_position\": \"last\",\r\n                \"one_counter_per_folder\": true,\r\n                \"image_preview\": true,\r\n                \"output_ext\": \".webp\",\r\n                \"quality\": 95,\r\n                \"images\": [\r\n                    \"37\",\r\n                    0\r\n                ]\r\n            },\r\n            \"class_type\": \"SaveImageExtended\",\r\n            \"_meta\": {\r\n                \"title\": \"💾 Save Image Extended\"\r\n            }\r\n        }\r\n    },\r\n    \"clientId\": \"method76\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{comfyui-host}}/prompt",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"prompt"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get running and pending prompt in queue",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{comfyui-host}}/queue",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"queue"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete running and pending prompt in queue",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"delete\": [\r\n        \"d1479891-87f6-46b3-9dc5-72b124ffb0a2\"\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{comfyui-host}}/queue",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"queue"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "clear queue",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"clear\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{comfyui-host}}/queue",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"queue"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get input",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{comfyui-host}}/view?filename=monalisa.jpg&type=input",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"view"
+					],
+					"query": [
+						{
+							"key": "filename",
+							"value": "monalisa.jpg"
+						},
+						{
+							"key": "type",
+							"value": "input"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get output",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{comfyui-host}}/view?filename=TESTING_00003_.png&type=output",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"view"
+					],
+					"query": [
+						{
+							"key": "filename",
+							"value": "TESTING_00003_.png"
+						},
+						{
+							"key": "type",
+							"value": "output"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get temp",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{comfyui-host}}/view?filename=ComfyUI_temp_bkqgs_00001_.png&type=temp",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"view"
+					],
+					"query": [
+						{
+							"key": "filename",
+							"value": "ComfyUI_temp_bkqgs_00001_.png"
+						},
+						{
+							"key": "type",
+							"value": "temp"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "upload",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"type": "file",
+							"src": "/C:/Users/S00141/Pictures/ghost.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{HOST}}/upload/image",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"upload",
+						"image"
+					]
+				},
+				"description": "this api can upload any type of file not only image\n\noptional query params are:\n\n- subfolder: save this file in specific folder\n- type: main folder, one of input, temp and output. default is input\n- overwrite: overwrite existed file or not\n    \n\nresponse body will be\n\n``` json\n{\n    \"name\": \"example.png\",\n    \"type\": \"input\",\n    \"subfolder\": \"\",\n}\n\n ```"
+			},
+			"response": [
+				{
+					"name": "upload image in subfolder",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/S00141/Pictures/ghost.jpg"
+								},
+								{
+									"key": "subfolder",
+									"value": "folder1/",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{HOST}}/upload/image",
+							"host": [
+								"{{HOST}}"
+							],
+							"path": [
+								"upload",
+								"image"
+							]
+						}
+					},
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "get single prompt history",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{comfyui-host}}/history/6a253113-f870-401e-86d3-3ff18b611546",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"history",
+						"6a253113-f870-401e-86d3-3ff18b611546"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all prompt history",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{comfyui-host}}/history",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"history"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all node info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{comfyui-host}}/object_info",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"object_info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get single node info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{comfyui-host}}/object_info/SaveImage",
+					"protocol": "http",
+					"host": [
+						"{{comfyui-host}}"
+					],
+					"path": [
+						"object_info",
+						"SaveImage"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

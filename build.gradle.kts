@@ -40,9 +40,9 @@ dependencies {
   // google
   implementation("com.google.code.gson:gson:2.10.1")
 
-  testImplementation("org.junit.jupiter:junit-jupiter-api:5.12.1")
   testImplementation("io.quarkus:quarkus-junit5:$quarkusPlatformVersion")
   testImplementation("io.rest-assured:rest-assured:5.5.1")
+//  testImplementation("org.junit.jupiter:junit-jupiter-api:5.12.1")
 }
 
 group = "ai.bitflow.comfyui.multi.gateway"
