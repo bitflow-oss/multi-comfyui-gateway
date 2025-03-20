@@ -1,5 +1,5 @@
 ## Stage 1 : build with maven builder image with native capabilities
-FROM quay.io/quarkus/ubi9-quarkus-mandrel-builder-image:jdk-21 AS build
+FROM quay.io/quarkus/ubi9-quarkus-mandrel-builder-image:jdk-21 AS builder
 USER root
 RUN microdnf install findutils
 COPY --chown=quarkus:quarkus gradlew /code/gradlew
@@ -15,7 +15,7 @@ RUN ./gradlew build -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=
 ## Stage 2 : create the docker final image
 FROM quay.io/quarkus/ubi9-quarkus-micro-image:2.0
 WORKDIR /work/
-COPY --from=build /code/build/*-runner /work/application
+COPY --from=builder /code/build/*-runner /work/application
 RUN chmod 775 /work
 EXPOSE 8080
 CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
