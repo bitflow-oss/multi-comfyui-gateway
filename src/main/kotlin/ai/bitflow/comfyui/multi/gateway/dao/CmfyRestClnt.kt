@@ -1,7 +1,7 @@
 package ai.bitflow.comfyui.multi.gateway.dao
 
+import ai.bitflow.comfyui.multi.gateway.rqst.CmfyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyUpldImgRqst
-import ai.bitflow.comfyui.multi.gateway.rqst.GnrtTextToImgRqst
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
@@ -23,7 +23,7 @@ interface CmfyRestClnt {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("prompt")
   fun queuePrompt(@HeaderParam("Authorization") authorization: String
-                  , param: GnrtTextToImgRqst): String
+                  , param: CmfyTextToImgRqst): String
 
   /**
    * Check Generation Progress (Polling)

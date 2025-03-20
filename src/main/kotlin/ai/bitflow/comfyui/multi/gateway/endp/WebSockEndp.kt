@@ -1,8 +1,8 @@
 package ai.bitflow.comfyui.multi.gateway.endp
 
 import ai.bitflow.comfyui.multi.gateway.cnst.WbskCnst
-import ai.bitflow.comfyui.multi.gateway.extn.FullQueExtn
-import ai.bitflow.comfyui.multi.gateway.rqst.GnrtTextToImgRqst
+import ai.bitflow.comfyui.multi.gateway.extn.FullNodeAndQueExtn
+import ai.bitflow.comfyui.multi.gateway.rqst.GtwyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
 import ai.bitflow.comfyui.multi.gateway.srvc.GnrtJobSrvc
 import io.quarkus.websockets.next.*
@@ -20,7 +20,7 @@ import org.jboss.logging.Logger
 //@RolesAllowed(*[JwtAuth.SIGN_IN])
 @WebSocket(path = "/ws/?clientId={clientId}")
 @ApplicationScoped
-class WbskEndp {
+class WebSockEndp {
 
   @Inject
   lateinit var log: Logger
@@ -65,7 +65,7 @@ class WbskEndp {
 
     log.debug("[WBSK] onError clientId / errMsg => ${getClientId(conn)} / ${e.message}")
 
-    if (e is FullQueExtn) {
+    if (e is FullNodeAndQueExtn) {
       log.warn("[WBSK] Waiting linea are full")
       val ret1 = GnrtTextToImgRsps(
         clientId = getClientId(conn),
@@ -85,7 +85,7 @@ class WbskEndp {
   }
 
   @OnTextMessage
-  fun onTextMessage(@PathParam clientId: String, param: GnrtTextToImgRqst, conn: WebSocketConnection): GnrtTextToImgRsps {
+  fun onTextMessage(@PathParam clientId: String, param: GtwyTextToImgRqst, conn: WebSocketConnection): GnrtTextToImgRsps {
     log.debug("[WBSK] onMessage param / clientId / conn => $param / $clientId / $conn")
     val queStat = gnrtJobSrvc.getQueStat()
     var ret = gnrtJobSrvc.generateImages(param)

@@ -1,7 +1,7 @@
 package ai.bitflow.comfyui.multi.gateway.endp
 
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyUpldImgRqst
-import ai.bitflow.comfyui.multi.gateway.rqst.GnrtTextToImgRqst
+import ai.bitflow.comfyui.multi.gateway.rqst.GtwyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rsps.ComnRsps
 import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
 import ai.bitflow.comfyui.multi.gateway.srvc.GnrtJobSrvc
@@ -13,8 +13,8 @@ import org.jboss.logging.Logger
 import org.jboss.resteasy.reactive.RestPath
 import org.jboss.resteasy.reactive.RestQuery
 
-@Path("")
-class RestEndp {
+@Path("api/v1")
+class RestFulEndp {
 
 
   @Inject
@@ -27,17 +27,17 @@ class RestEndp {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @Path("prompt")
-  fun queuePrompt(param: GnrtTextToImgRqst, req: HttpServerRequest)
-    : ComnRsps<GnrtTextToImgRsps>? {
+  fun queuePrompt(param: GtwyTextToImgRqst, req: HttpServerRequest): ComnRsps<GnrtTextToImgRsps> {
+    log.debug("[queuePrompt] $param")
     val ret: GnrtTextToImgRsps = gnrtJobSrvc.generateImages(param)
     return ComnRsps(ret)
   }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("/history/{promptId}")
-  fun getHistory(@RestPath promptId: String, req: HttpServerRequest)
-    : ComnRsps<Boolean>? {
+  @Path("history/{promptId}")
+  fun getHistory(@RestPath promptId: String, req: HttpServerRequest): ComnRsps<Boolean> {
+    log.debug("[getHistory] $promptId")
     return ComnRsps(false)
   }
 
@@ -48,8 +48,8 @@ class RestEndp {
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   @Path("view")
   fun getImage(@RestQuery filename: String, @RestQuery subfolder: String
-               , @RestQuery type: String, req: HttpServerRequest)
-    : ComnRsps<Boolean>? {
+               , @RestQuery type: String, req: HttpServerRequest): ComnRsps<Boolean>? {
+    log.debug("[getImage] $filename / $subfolder / $type")
     return ComnRsps(false)
   }
 
@@ -57,8 +57,8 @@ class RestEndp {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   @Path("upload/image")
-  fun uploadImage(param: CmfyUpldImgRqst, req: HttpServerRequest)
-    : ComnRsps<Boolean>? {
+  fun uploadImage(param: CmfyUpldImgRqst, req: HttpServerRequest): ComnRsps<Boolean>? {
+    log.debug("[uploadImage] $param")
     return ComnRsps(false)
   }
 

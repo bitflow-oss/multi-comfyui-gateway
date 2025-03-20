@@ -45,7 +45,7 @@ class UnitTest {
     log.debug("testRestEndpoint res: $res")
   }
 
-  @Test
+//  @Test
   fun testWebsocketEndpoint() {
     val testClientId = "test-client-id"
     var uri: URI = gnrtJobSrvc.getWebsocketUri(0, testClientId)

@@ -6,8 +6,10 @@ import ai.bitflow.comfyui.multi.gateway.dao.CmfyWbskClnt
 import ai.bitflow.comfyui.multi.gateway.dao.HostJsonTpltLctr
 import ai.bitflow.comfyui.multi.gateway.data.CmfyQueInfo
 import ai.bitflow.comfyui.multi.gateway.data.CmfyTaskQue
-import ai.bitflow.comfyui.multi.gateway.extn.FullQueExtn
-import ai.bitflow.comfyui.multi.gateway.rqst.GnrtTextToImgRqst
+import ai.bitflow.comfyui.multi.gateway.extn.FullNodeAndQueExtn
+import ai.bitflow.comfyui.multi.gateway.extn.NoNodeExtnNodeAnd
+import ai.bitflow.comfyui.multi.gateway.rqst.CmfyTextToImgRqst
+import ai.bitflow.comfyui.multi.gateway.rqst.GtwyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
 import ai.bitflow.comfyui.multi.gateway.rsps.QueStatRsps
 import io.quarkus.qute.Engine
@@ -96,7 +98,7 @@ class GnrtJobSrvc {
   private fun getComfyHostNameAt(idx: Int): String {
     val hostName = getComfyHost()
     if (idx < 0 || idx >= hostName.size) {
-      throw FullQueExtn()
+      throw FullNodeAndQueExtn()
     } else {
       return getComfyHost()[idx]!!
     }
@@ -123,21 +125,24 @@ class GnrtJobSrvc {
    * 4. 프롬프트에 대해 생성된 이미지를 가져옵니다.
    * 5. 이미지를 로컬에 저장
    */
-  fun generateImages(param: GnrtTextToImgRqst): GnrtTextToImgRsps {
+  fun generateImages(inParam: GtwyTextToImgRqst): GnrtTextToImgRsps {
 
     val que: CmfyQueInfo = getBestQue()
     val cmfyClnt: CmfyRestClnt = getRestClient(que.queNo)
     // 1. 워크플로우 template에 동적 파라미터 매핑
-    var data = param.prompt
+//    var data = param.prompt
 //    hostJsonTpltLctr.locate("/'workflow/some-workflow.json")
-    param.prompt = templateEngine.getTemplate("/'workflow/some-workflow.json").data("data", data).render()
-    log.debug("prompt ${param.prompt}")
+    var outParam = CmfyTextToImgRqst(
+      prompt = templateEngine.getTemplate("/'workflow/some-workflow.json").data("data", "").render(),
+      clientId = inParam.clientId
+    )
+    log.debug("prompt ${outParam.prompt}")
     // 2. Rest 생성요청 큐잉
-    cmfyClnt.queuePrompt(getCmfyAuthHead(), param)
+    cmfyClnt.queuePrompt(getCmfyAuthHead(), outParam)
     // 3. Websocket => nedd to open to listen progress
-    cnntCmfyAndSendMsg(que.queNo, param.clientId)
+    cnntCmfyAndSendMsg(que.queNo, outParam.clientId)
     var ret = GnrtTextToImgRsps(
-      clientId = param.clientId,
+      clientId = outParam.clientId,
       stat = WbskCnst.ON_QUE_ADD
     )
     return ret
@@ -165,8 +170,10 @@ class GnrtJobSrvc {
     if (comfyUiQues.get[minQueIdx].size < COMFYUI_MAX_QUE_SIZE_EACH.toInt()) {
       return CmfyQueInfo((minQueIdx + 1),
                 comfyUiQues.get[minQueIdx][comfyUiQues.get[minQueIdx].size])
+    } else if (comfyUiQues.get.size < 1) {
+      throw NoNodeExtnNodeAnd()
     } else {
-      return CmfyQueInfo(-1, null)
+      throw FullNodeAndQueExtn()
     }
   }
 

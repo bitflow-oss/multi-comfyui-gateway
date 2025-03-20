@@ -32,6 +32,7 @@ dependencies {
   implementation("io.quarkus:quarkus-smallrye-jwt:$quarkusPlatformVersion")
   implementation("io.quarkus:quarkus-rest-jackson:$quarkusPlatformVersion")
   implementation("io.quarkus:quarkus-websockets-next:$quarkusPlatformVersion")
+  implementation("io.quarkus:quarkus-smallrye-openapi:$quarkusPlatformVersion")
   implementation("io.quarkus:quarkus-smallrye-jwt-build:$quarkusPlatformVersion")
   implementation("io.quarkus:quarkus-rest-client-jackson:$quarkusPlatformVersion")
   implementation("io.quarkus:quarkus-websockets-next-kotlin:$quarkusPlatformVersion")

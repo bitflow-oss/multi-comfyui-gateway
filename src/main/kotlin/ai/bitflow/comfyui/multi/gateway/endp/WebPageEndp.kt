@@ -9,7 +9,7 @@ import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
 import org.jboss.logging.Logger
 
-@Path("/view")
+@Path("view")
 class WebPageEndp {
 
 
