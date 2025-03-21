@@ -16,6 +16,7 @@ repositories {
   mavenLocal()
 }
 
+//val isLocal: String by project
 val quarkusPlatformGroupId: String by project
 val quarkusPlatformArtifactId: String by project
 val quarkusPlatformVersion: String by project

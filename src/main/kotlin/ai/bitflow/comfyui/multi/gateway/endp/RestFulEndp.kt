@@ -2,6 +2,7 @@ package ai.bitflow.comfyui.multi.gateway.endp
 
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyUpldImgRqst
 import ai.bitflow.comfyui.multi.gateway.rqst.GtwyTextToImgRqst
+import ai.bitflow.comfyui.multi.gateway.rsps.CmfyQuePmptRsps
 import ai.bitflow.comfyui.multi.gateway.rsps.ComnRsps
 import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
 import ai.bitflow.comfyui.multi.gateway.srvc.GnrtJobSrvc
@@ -27,9 +28,9 @@ class RestFulEndp {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @Path("prompt")
-  fun queuePrompt(param: GtwyTextToImgRqst, req: HttpServerRequest): ComnRsps<Boolean> {
+  fun queuePrompt(param: GtwyTextToImgRqst, req: HttpServerRequest): ComnRsps<CmfyQuePmptRsps?> {
     log.debug("[queuePrompt] $param")
-    var ret = false
+    var ret: CmfyQuePmptRsps? = null
     try {
        ret = gnrtJobSrvc.generateImages(param)
     } catch (e: Exception) {

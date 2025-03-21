@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class CmfyQuePmptRsps (
   @JsonProperty("prompt_id")
-  var promptId: CmfyQueRman,
+  var promptId: String,
   var number: Int,
   @JsonProperty("node_errors")
   var nodeErrors: Map<String, Any>

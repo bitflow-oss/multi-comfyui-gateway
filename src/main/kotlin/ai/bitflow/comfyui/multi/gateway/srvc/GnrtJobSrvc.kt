@@ -5,15 +5,12 @@ import ai.bitflow.comfyui.multi.gateway.dao.CmfyHostChckDao
 import ai.bitflow.comfyui.multi.gateway.dao.HostJsonTpltLctr
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rqst.GtwyTextToImgRqst
+import ai.bitflow.comfyui.multi.gateway.rsps.CmfyQuePmptRsps
 import ai.bitflow.comfyui.multi.gateway.rsps.QueStatRsps
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.gson.Gson
 import io.quarkus.qute.Engine
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 import org.eclipse.microprofile.config.inject.ConfigProperty
 import org.jboss.logging.Logger
 import org.jose4j.json.internal.json_simple.JSONObject
@@ -29,8 +26,6 @@ class GnrtJobSrvc {
 
   @ConfigProperty(name = "comfyui.max.queue.size.each")
   lateinit var COMFYUI_MAX_QUE_SIZE_EACH: String
-
-  var BASE_PATH = "/gen-ai-runtime/multi-comfyui-gateway"
 
   @Inject
   lateinit var templateEngine: Engine
@@ -65,13 +60,15 @@ class GnrtJobSrvc {
    *
    * e.g. A beautiful Korean k-pop idol girl in her 20s at a cozy living room that beautifully decorated purple floral wallpaper
    */
-  fun generateImages(inParam: GtwyTextToImgRqst): Boolean {
-    val jsonPath = File("$BASE_PATH/workflow/sample-workflow-1.json").absolutePath
+  fun generateImages(inParam: GtwyTextToImgRqst): CmfyQuePmptRsps? {
+    //   var BASE_PATH = "/gen-ai-runtime/multi-comfyui-gateway"
+    val appBasePath = cmfyHostChckDao.getAppBasePath()
+    val jsonPath = File("$appBasePath/workflow/sample-workflow-1.json").absolutePath
     log.debug("[generateImages][jsonPath] $jsonPath")
     inParam.seed = Math.abs(SecureRandom.getInstanceStrong().nextInt()).toString()
     val jsonTplt = templateEngine.getTemplate(jsonPath).data("data", inParam).render()
     val objectMapper = ObjectMapper()
-    var jsonParam = objectMapper.readValue(jsonTplt, JSONObject::class.java)
+    val jsonParam = objectMapper.readValue(jsonTplt, JSONObject::class.java)
 //    val jsonJsonObjt = Json.parseToJsonElement(jsonTplt).jsonObject
 //    val jsonParam = Gson().fromJson(jsonTplt, com.google.gson.JsonObject::class.java)
     log.debug("[generateImages][jsonStrLoad] $jsonParam")

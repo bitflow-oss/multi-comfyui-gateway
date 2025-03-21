@@ -19,6 +19,13 @@ object TaskStat {
   const val ERROR = "error"
 }
 
+object LaunchEnv {
+  const val DEV = "dev"
+  const val STAG = "stag"
+  const val PROD = "prod"
+}
+
+
 object JwtAuth {
   const val SIGN_IN = "AUTH0001"
 }

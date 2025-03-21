@@ -1,28 +1,38 @@
 package ai.bitflow.comfyui.multi.gateway.dao
 
+import ai.bitflow.comfyui.multi.gateway.cnst.LaunchEnv
 import ai.bitflow.comfyui.multi.gateway.cnst.WbskCnst
 import ai.bitflow.comfyui.multi.gateway.data.CmfyQueInfo
 import ai.bitflow.comfyui.multi.gateway.excn.FullQueEctn
 import ai.bitflow.comfyui.multi.gateway.excn.NoNodeEctn
 import ai.bitflow.comfyui.multi.gateway.rqst.CmfyTextToImgRqst
 import ai.bitflow.comfyui.multi.gateway.rsps.CmfyGetQueRsps
+import ai.bitflow.comfyui.multi.gateway.rsps.CmfyQuePmptRsps
 import ai.bitflow.comfyui.multi.gateway.rsps.GnrtTextToImgRsps
 import com.google.gson.Gson
 import io.quarkus.websockets.next.WebSocketClientConnection
 import io.quarkus.websockets.next.WebSocketConnector
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
-import kotlinx.serialization.json.*
 import org.eclipse.microprofile.config.inject.ConfigProperty
 import org.eclipse.microprofile.rest.client.RestClientBuilder
 import org.jboss.logging.Logger
+import java.io.File
 import java.net.URI
+import java.net.URL
+import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.toPath
 
 @ApplicationScoped
 class CmfyHostChckDao {
 
   @Inject
   lateinit var log: Logger
+
+  @ConfigProperty(name = "launch.env")
+  lateinit var LAUNCH_ENV: String
 
   @ConfigProperty(name = "comfyui.instance.count")
   lateinit var COMFYUI_INSTANCE_COUNT: String
@@ -163,11 +173,11 @@ class CmfyHostChckDao {
     return null
   }
 
-  fun pullQue(nodeIdx: Int): GnrtTextToImgRsps? {
+  fun pullQue(nodeIdx: Int): CmfyQuePmptRsps? {
     val item: CmfyTextToImgRqst = this.comfyUiQues[nodeIdx].removeFirst()
     val cmfyClnt: CmfyRestClnt = getRestClient(nodeIdx)
     log.debug("[cmfyRqst] $item")
-    var cmfyRsps: Map<String, Any>?
+    var cmfyRsps: CmfyQuePmptRsps? = null
     try {
       cmfyRsps = cmfyClnt.queuePrompt(getCmfyAuthHead(), item)
       log.debug("[cmgyRsps] $cmfyRsps")
@@ -175,24 +185,19 @@ class CmfyHostChckDao {
       e.printStackTrace()
     }
 //    cnntCmfyAndSendMsg(nodeIdx, item.clientId)
-    val ret = GnrtTextToImgRsps(
-      clientId = item.client_id,
-      stat = WbskCnst.ON_QUE_ADD
-    )
-    return ret
+    return cmfyRsps
   }
 
   fun getQueStat(): List<ArrayDeque<CmfyTextToImgRqst>>? {
     return this.comfyUiQues
   }
 
-  fun addCmfyTaskQue(task: CmfyTextToImgRqst): Boolean {
+  fun addCmfyTaskQue(task: CmfyTextToImgRqst): CmfyQuePmptRsps? {
     val que: ArrayDeque<CmfyTextToImgRqst> = getBestQue(task) ?: throw FullQueEctn()
     log.debug("[AddedCmfyQue][nodeIdx:${task.nodeIdx}][queIdx:${que.size}][param:${task.prompt}]")
     que.addLast(task)
     // Todo: 임시,
-    pullQue(task.nodeIdx)
-    return true
+    return pullQue(task.nodeIdx)
   }
 
   fun cnntCmfyAndSendMsg(queNo: Int, clientId: String) {
@@ -206,6 +211,22 @@ class CmfyHostChckDao {
 
   fun getWebsocketUri(idx: Int, clientId: String): URI {
     return URI.create("ws://${getComfyHostNameAt(idx)}/ws?clientId=$clientId")
+  }
+
+  fun getAppBasePath(): String {
+    var path: Path? = null
+    when (LAUNCH_ENV) {
+      LaunchEnv.DEV -> path =  getClasspathResourceURI()!!.toPath().parent.parent.parent.parent
+      LaunchEnv.STAG -> path = Paths.get("")
+      LaunchEnv.PROD -> path = Paths.get("")
+    }
+    return path!!.absolutePathString()
+  }
+
+  fun getClasspathResourceURI(): URI? {
+    val classLoader = Thread.currentThread().contextClassLoader
+    val url: URL? = classLoader.getResource("application.properties")
+    return url?.toURI()
   }
 
   fun test() {
