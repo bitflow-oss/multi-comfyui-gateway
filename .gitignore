@@ -46,3 +46,4 @@ out/
 /docs
 /workflow/*
 !/workflow/sample-workflow.json
+/caddy/Caddyfile
