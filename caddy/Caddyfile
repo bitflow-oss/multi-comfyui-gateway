@@ -1,0 +1,11 @@
+localhost {
+   reverse_proxy /view/node1 localhost:9100 {
+        transparent
+   }
+   reverse_proxy /view/node2 localhost:9200 {
+       transparent
+  }
+   reverse_proxy /ws http://localhost:8081 {
+        websocket
+   }
+}

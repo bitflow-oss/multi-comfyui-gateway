@@ -7,7 +7,7 @@ services:
     container_name: multi-comfyui-gateway
     image: bitflowinc/multi-comfyui-gateway:latest
     env_file:
-      - comfyui.env
+      - comfyui-gateway.env
     volumes:
       - "./caddy:/var/lib/caddy/.config/caddy"
       - "./workflows:/app/user/default/workflows"

@@ -7,8 +7,9 @@ services:
     container_name: multi-comfyui-gateway
     image: bitflowinc/multi-comfyui-gateway:latest
     env_file:
-      - comfyui.env
+      - comfyui-gateway.env
     volumes:
-      - "./workflows:/app/user/default/workflows"
+      - "./workflow:/work/workflow"
+      - "./caddy:/work/caddy"
     ports:
-      - "9000:8080"
+      - "443:8080"
