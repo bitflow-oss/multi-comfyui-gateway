@@ -1,11 +1,32 @@
 localhost {
-   reverse_proxy /view/node1 localhost:9100 {
-        transparent
-   }
-   reverse_proxy /view/node2 localhost:9200 {
-       transparent
-  }
-   reverse_proxy /ws http://localhost:8081 {
-        websocket
-   }
+     handle_path /view/* {
+		reverse_proxy host.docker.internal:9000
+     }
+     handle_path /api/v1/* {
+          reverse_proxy host.docker.internal:9000
+     }
+     handle_path /node1/* {
+		reverse_proxy host.docker.internal:9100
+	}
+     handle_path /node2/* {
+		reverse_proxy host.docker.internal:9200
+	}
+     handle_path /node3/* {
+		reverse_proxy host.docker.internal:9300
+	}
+     handle_path /node4/* {
+		reverse_proxy host.docker.internal:9400
+	}
+     handle_path /node5/* {
+		reverse_proxy host.docker.internal:9500
+	}
+     handle_path /node6/* {
+		reverse_proxy host.docker.internal:9600
+	}
+     handle_path /node7/* {
+		reverse_proxy host.docker.internal:9700
+	}
+     handle_path /node8/* {
+		reverse_proxy host.docker.internal:9800
+	}
 }

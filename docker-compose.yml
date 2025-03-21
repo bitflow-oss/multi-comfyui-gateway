@@ -12,4 +12,4 @@ services:
       - "./workflow:/work/workflow"
       - "./caddy:/work/caddy"
     ports:
-      - "443:8080"
+      - "9000:8080"

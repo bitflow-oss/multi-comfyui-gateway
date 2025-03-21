@@ -28,7 +28,6 @@ WORKDIR /work/
 RUN mkdir /work/workflow
 RUN mkdir /work/caddy
 
-COPY caddy/Caddyfile /work/caddy/
 COPY --from=builder /usr/bin/caddy /usr/bin/
 COPY --from=builder /code/build/*-runner /work/application
 
