@@ -28,12 +28,13 @@ WORKDIR /work/
 RUN mkdir /work/workflow
 RUN mkdir /work/caddy
 
+COPY caddy/Caddyfile /work/caddy/
 COPY --from=builder /usr/bin/caddy /usr/bin/
 COPY --from=builder /code/build/*-runner /work/application
 
-RUN caddy start --config /work/caddy/Caddyfile
 RUN echo "Copying modules and compiled executable to runtime image has finished"
-
 RUN chmod 775 /work
-EXPOSE 8080
+
+EXPOSE 80 8080
+
 CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
