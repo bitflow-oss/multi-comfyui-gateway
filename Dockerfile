@@ -5,9 +5,7 @@ USER root
 
 RUN echo "Start installing dependencies"
 RUN microdnf update -y
-RUN microdnf install findutils dnf 'dnf-command(copr)' -y
-RUN dnf copr enable @caddy/caddy -y
-RUN dnf install caddy -y
+RUN microdnf install findutils -y
 RUN echo "Installing dependencies finished"
 
 COPY --chown=quarkus:quarkus gradlew /code/gradlew
@@ -26,15 +24,14 @@ RUN echo "Quarkus Native build finished"
 FROM quay.io/quarkus/ubi9-quarkus-micro-image:2.0
 WORKDIR /work/
 RUN mkdir /work/workflow
-RUN mkdir /work/caddy
+RUN mkdir /work/conf
 
-COPY caddy/Caddyfile /work/caddy/
-COPY --from=builder /usr/bin/caddy /usr/bin/
 COPY --from=builder /code/build/*-runner /work/application
 
+COPY conf/run-app.sh /work/conf/
 RUN echo "Copying modules and compiled executable to runtime image has finished"
 RUN chmod 775 /work
 
-EXPOSE 80 8080
+EXPOSE 8080
 
-CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
+CMD ["/work/conf/run-app.sh"]

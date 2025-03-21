@@ -10,8 +10,5 @@ services:
       - comfyui-gateway.env
     volumes:
       - "./workflow:/work/workflow"
-      - "./caddy:/work/caddy"
     ports:
-      - "80:80"
       - "9000:8080"
-    command: ["caddy", "start", "--config", "/work/caddy/Caddyfile"]

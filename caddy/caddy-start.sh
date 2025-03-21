@@ -1,1 +1,0 @@
-caddy start --config /work/caddy/Caddyfile
