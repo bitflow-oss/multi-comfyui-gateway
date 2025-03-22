@@ -20,6 +20,7 @@ COPY src /code/src
 RUN ./gradlew build -x test -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
 RUN echo "Quarkus Native build finished"
 
+
 ## Stage 2 : create the docker final image
 FROM quay.io/quarkus/ubi9-quarkus-micro-image:2.0
 WORKDIR /work/
@@ -27,8 +28,8 @@ RUN mkdir /work/workflow
 RUN mkdir /work/conf
 
 COPY --from=builder /code/build/*-runner /work/application
-
 COPY conf/run-app.sh /work/conf/
+
 RUN echo "Copying modules and compiled executable to runtime image has finished"
 RUN chmod -R 775 /work
 
