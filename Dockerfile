@@ -30,7 +30,7 @@ COPY --from=builder /code/build/*-runner /work/application
 
 COPY conf/run-app.sh /work/conf/
 RUN echo "Copying modules and compiled executable to runtime image has finished"
-RUN chmod 775 /work
+RUN chmod -R 775 /work
 
 EXPOSE 8080
 
