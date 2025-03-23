@@ -16,6 +16,8 @@ import org.jboss.logging.Logger
 import org.jose4j.json.internal.json_simple.JSONObject
 import java.io.File
 import java.security.SecureRandom
+import kotlin.random.Random
+import kotlin.random.nextULong
 
 
 @ApplicationScoped
@@ -59,18 +61,21 @@ class GnrtJobSrvc {
    * 5. 이미지를 로컬에 저장
    *
    * e.g. A beautiful Korean k-pop idol girl in her 20s at a cozy living room that beautifully decorated purple floral wallpaper
+   *
+   * About seed no. - The seed parameter is an integer that initializes the random number generator. It helps in producing reproducible results. The default value is 0, with a minimum of 0 and a maximum of 0xffffffffffffffff.
+   * ref. https://www.runcomfy.com/comfyui-nodes/efficiency-nodes-comfyui/KSampler--Efficient-
+   * KSampler Max Number : 18446744073709551615 (20digit) / Kotlin Max Long : 9223372036854775807 (19) / Kotlin Max ULong : 18446744073709551615 (O)
    */
   fun generateImages(inParam: GtwyTextToImgRqst): CmfyQuePmptRsps? {
-    //   var BASE_PATH = "/gen-ai-runtime/multi-comfyui-gateway"
+
     val appBasePath = cmfyHostChckDao.getAppBasePath()
     val jsonPath = File("$appBasePath/workflow/sample-workflow-1.json").absolutePath
     log.debug("[generateImages][jsonPath] $jsonPath")
-    inParam.seed = Math.abs(SecureRandom.getInstanceStrong().nextInt()).toString()
+    inParam.seed = Random.nextULong().toString()
     val jsonTplt = templateEngine.getTemplate(jsonPath).data("data", inParam).render()
     val objectMapper = ObjectMapper()
     val jsonParam = objectMapper.readValue(jsonTplt, JSONObject::class.java)
-//    val jsonJsonObjt = Json.parseToJsonElement(jsonTplt).jsonObject
-//    val jsonParam = Gson().fromJson(jsonTplt, com.google.gson.JsonObject::class.java)
+
     log.debug("[generateImages][jsonStrLoad] $jsonParam")
     val rqstParam = CmfyTextToImgRqst(
       prompt = jsonParam, // Gson().fromJson(jsonTplt, LinkedTreeMap::class.java),
