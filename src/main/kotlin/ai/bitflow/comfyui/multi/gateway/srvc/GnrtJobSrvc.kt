@@ -69,7 +69,7 @@ class GnrtJobSrvc {
   fun generateImages(inParam: GtwyTextToImgRqst): CmfyQuePmptRsps? {
 
     val appBasePath = cmfyHostChckDao.getAppBasePath()
-    val jsonPath = File("$appBasePath/workflow/sample-workflow-1.json").absolutePath
+    val jsonPath = File("$appBasePath/workflow/node1-workflow-api.json").absolutePath
     log.debug("[generateImages][jsonPath] $jsonPath")
     inParam.seed = Random.nextULong().toString()
     val jsonTplt = templateEngine.getTemplate(jsonPath).data("data", inParam).render()
